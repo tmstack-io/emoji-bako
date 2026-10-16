@@ -71,9 +71,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
     
     @objc func statusItemClicked(_ sender: NSStatusBarButton) {
-        let event = NSApp.currentEvent!
-        
-        if event.type == .rightMouseUp {
+        // VoiceOverなどのアクセシビリティ操作で押されたときはマウスのイベントがない（currentEventがnil）。主要な操作として扱う
+        if NSApp.currentEvent?.type == .rightMouseUp {
             // 右クリック: メニュー表示
             showMenu()
         } else {
