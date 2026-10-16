@@ -1,5 +1,5 @@
 import SwiftUI
-import Carbon.HIToolbox
+import Combine
 import ServiceManagement
 
 @main
@@ -24,7 +24,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var floatingWindow: FloatingPanel?
     var settingsWindow: NSWindow?
     var eventMonitor: Any?
-    var hotKeyRef: EventHotKeyRef?
+    private var hotKeyRegistrar: HotKeyRegistrar!
+    private var hotKeySubscription: AnyCancellable?
     var previousApp: NSRunningApplication?
     let accessibilityOnboarding = AccessibilityOnboardingController()
     
@@ -44,8 +45,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // フローティングウィンドウを作成
         createFloatingWindow()
         
-        // グローバルホットキーを登録 (Cmd + .)
-        registerHotKey()
+        // グローバルホットキーを登録する。保存されたキーを登録できなければ、設定画面で選び直してもらう
+        setupHotKey()
+        if HotKeyStore.shared.registrationError != nil {
+            openSettings()
+        }
 
         // 絵文字の入力にはアクセシビリティ権限が必要なため、未許可なら起動時に案内する
         if !AccessibilityPermission.isGranted {
@@ -101,7 +105,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let window = NSWindow(contentViewController: hostingController)
             window.title = "EmojiBako 設定"
             window.styleMask = [.titled, .closable]
-            window.setContentSize(NSSize(width: 350, height: 240))
             window.center()
             
             self.settingsWindow = window
@@ -152,7 +155,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if let eventMonitor = eventMonitor {
             NSEvent.removeMonitor(eventMonitor)
         }
-        unregisterHotKey()
+        hotKeyRegistrar.unregister()
     }
     
     @objc func toggleWindow() {
@@ -209,43 +212,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
     
-    func registerHotKey() {
-        let hotKeyID = EventHotKeyID(signature: OSType(0x454D4F4A), id: 1) // "EMOJ"
-        var hotKeyRef: EventHotKeyRef?
-        
-        // Cmd + . (period key = 47)
-        let status = RegisterEventHotKey(
-            UInt32(kVK_ANSI_Period),
-            UInt32(cmdKey),
-            hotKeyID,
-            GetApplicationEventTarget(),
-            0,
-            &hotKeyRef
-        )
-        
-        if status == noErr {
-            self.hotKeyRef = hotKeyRef
-        }
-        
-        // イベントハンドラをインストール
-        var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
-        InstallEventHandler(GetApplicationEventTarget(), { (_, event, _) -> OSStatus in
-            NotificationCenter.default.post(name: .hotKeyPressed, object: nil)
-            return noErr
-        }, 1, &eventType, nil, nil)
-        
-        NotificationCenter.default.addObserver(forName: .hotKeyPressed, object: nil, queue: .main) { [weak self] _ in
+    /// 保存されたホットキーを登録し、設定画面での変更やキーの記録の開始・終了に合わせて登録し直す
+    func setupHotKey() {
+        hotKeyRegistrar = HotKeyRegistrar { [weak self] in
             self?.toggleWindow()
         }
+        let store = HotKeyStore.shared
+        hotKeySubscription = store.$hotKey.combineLatest(store.$isRecording)
+            .sink { [weak self] hotKey, isRecording in
+                guard let self else { return }
+                if isRecording {
+                    self.hotKeyRegistrar.unregister()
+                } else {
+                    store.registrationError = self.hotKeyRegistrar.register(hotKey)
+                }
+            }
     }
-    
-    func unregisterHotKey() {
-        if let hotKeyRef = hotKeyRef {
-            UnregisterEventHotKey(hotKeyRef)
-        }
-    }
-}
-
-extension Notification.Name {
-    static let hotKeyPressed = Notification.Name("hotKeyPressed")
 }

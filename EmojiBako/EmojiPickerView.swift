@@ -261,6 +261,11 @@ struct EmojiPickerView: View {
     private func handleKeyEvent(_ event: NSEvent) -> NSEvent? {
         let columnsCount = 8
 
+        // ローカルモニタはアプリのすべてのウィンドウのキー入力を受け取るため、ピッカー以外（設定画面など）の入力には触らない
+        guard event.window is FloatingPanel else {
+            return event
+        }
+
         // IMEで変換中のキー入力（候補の選択・確定・取り消し）はすべてIMEに渡す
         if SearchField.isComposing(in: event.window) {
             return event

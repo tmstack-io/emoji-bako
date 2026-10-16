@@ -17,14 +17,10 @@ struct SettingsView: View {
             
             // キーボード
             GroupBox(label: Text("キーボード").fontWeight(.semibold)) {
-                HStack {
+                HStack(alignment: .firstTextBaseline) {
                     Text("ショートカット")
                     Spacer()
-                    Text("⌘ .")
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.secondary.opacity(0.2))
-                        .cornerRadius(4)
+                    HotKeyRecorder(store: HotKeyStore.shared)
                 }
                 .padding(.vertical, 4)
             }
@@ -40,10 +36,9 @@ struct SettingsView: View {
                 .padding(.vertical, 4)
             }
             
-            Spacer()
         }
         .padding(20)
-        .frame(width: 350, height: 240)
+        .frame(width: 350)
         .onAppear {
             launchAtLogin = getLaunchAtLoginStatus()
         }
