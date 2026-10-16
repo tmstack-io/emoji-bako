@@ -1,5 +1,4 @@
 import SwiftUI
-import Carbon.HIToolbox
 
 struct EmojiPickerView: View {
     @StateObject private var emojiData = EmojiData.shared
@@ -86,6 +85,8 @@ struct EmojiPickerView: View {
         }
         .onChange(of: searchQuery) {
             if isSearching {
+                // 並び順が変わるので、Enterで最上位の絵文字が入力されるよう選択を先頭に戻す
+                selectedEmojiIndex = 0
                 updateCurrentEmojis()
             }
         }
@@ -243,8 +244,9 @@ struct EmojiPickerView: View {
             return event
         }
 
-        // Cmd+F は検索モードのトグル（通常モード/検索モードどちらでも消費）
-        if event.modifierFlags.contains(.command) && event.keyCode == UInt16(kVK_ANSI_F) {
+        // Cmd+F は検索モードのトグル（通常モード/検索モードどちらでも消費）。
+        // Dvorakなどではキーの位置が異なるため、キーコードではなく文字で判定する
+        if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers?.lowercased() == "f" {
             if isSearching {
                 exitSearch()
             } else {
@@ -276,7 +278,7 @@ struct EmojiPickerView: View {
                 selectedEmojiIndex = newIndex
             }
             return nil
-        case 36: // Enter
+        case 36, 76: // Enter（Returnとテンキーのenter）
             if !currentEmojis.isEmpty && selectedEmojiIndex < currentEmojis.count {
                 selectEmoji(currentEmojis[selectedEmojiIndex])
             }
