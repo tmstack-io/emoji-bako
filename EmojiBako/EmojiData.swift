@@ -2,6 +2,7 @@
 // Loads emoji data from bundled JSON file
 
 import Foundation
+import os
 
 struct EmojiItem: Codable, Hashable, Identifiable {
     let char: String
@@ -70,9 +71,19 @@ class EmojiData: ObservableObject {
         loadUsageCounts()
     }
 
+    private let logger = Logger(subsystem: "io.tmstack.EmojiBako", category: "EmojiData")
+
     func loadUsageCounts() {
-        if let data = UserDefaults.standard.dictionary(forKey: userDefaultsKey) as? [String: Int] {
-            usageCounts = data
+        guard let stored = UserDefaults.standard.object(forKey: userDefaultsKey) else { return }
+        guard let counts = stored as? [String: Int] else {
+            logger.error("使用回数の保存データの形式が不正なため、使用回数なしで始めます: \(String(describing: stored), privacy: .public)")
+            return
+        }
+        usageCounts = counts
+        // 新しい版で使った絵文字を古い版で読んだ場合などに起きる。保存データは残し、表示からは外す
+        let unknown = counts.keys.filter { lookup[$0] == nil }
+        if !unknown.isEmpty {
+            logger.notice("絵文字データにない絵文字の使用回数があるため、よく使う絵文字には表示しません: \(unknown.sorted(), privacy: .public)")
         }
     }
 
@@ -86,9 +97,10 @@ class EmojiData: ObservableObject {
     }
 
     /// お気に入り（使用頻度上位）を EmojiItem として返す。
-    /// usageCountsにはピッカーで選んだ絵文字しか記録されないため、データにない絵文字があれば不整合として停止する。
+    /// 絵文字データにない絵文字（新しい版で使ったものなど）は、読み込み時にログに残したうえで除外する。
     func getFavorites() -> [EmojiItem] {
         return usageCounts
+            .filter { lookup[$0.key] != nil }
             .sorted { lhs, rhs in
                 if lhs.value != rhs.value {
                     return lhs.value > rhs.value
@@ -96,11 +108,6 @@ class EmojiData: ObservableObject {
                 return lhs.key < rhs.key
             }
             .prefix(50)
-            .map { entry in
-                guard let item = lookup[entry.key] else {
-                    fatalError("使用回数に絵文字データにない絵文字があります: \(entry.key)")
-                }
-                return item
-            }
+            .map { lookup[$0.key]! }
     }
 }
