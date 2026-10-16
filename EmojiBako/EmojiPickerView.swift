@@ -187,11 +187,10 @@ struct EmojiPickerView: View {
         let emoji = item.char
         emojiData.incrementUsage(for: emoji)
 
-        // クリップボードに絵文字をセット
+        // 元のクリップボードを全形式のまま退避し、絵文字を一時的に置く
         let pasteboard = NSPasteboard.general
-        let oldContents = pasteboard.string(forType: .string)
-        pasteboard.clearContents()
-        pasteboard.setString(emoji, forType: .string)
+        let snapshot = PasteboardSnapshot(of: pasteboard)
+        let emojiChangeCount = PasteboardSnapshot.writeTransient(emoji, to: pasteboard)
 
         // ウィンドウを閉じる（元アプリにフォーカスが戻る）
         onClose?()
@@ -211,11 +210,10 @@ struct EmojiPickerView: View {
                 keyUp.post(tap: .cgAnnotatedSessionEventTap)
             }
 
-            // 元のクリップボードを復元
+            // 元のクリップボードを復元する。待つあいだに利用者が別の内容をコピーしていたら、そちらを残す
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                if let oldContents = oldContents {
-                    pasteboard.clearContents()
-                    pasteboard.setString(oldContents, forType: .string)
+                if pasteboard.changeCount == emojiChangeCount {
+                    snapshot.restore(to: pasteboard)
                 }
             }
         }
