@@ -5,7 +5,11 @@ import Foundation
 
 struct EmojiItem: Codable, Hashable, Identifiable {
     let char: String
-    let name: String
+    let englishName: String
+    let japaneseName: String
+    let japaneseKeywords: [String]
+    /// 漢字を含む日本語の名前・キーワードの読み（ひらがな）
+    let readings: [String]
 
     var id: String { char }
 }
@@ -18,7 +22,8 @@ struct EmojiCategory: Identifiable, Hashable, Codable {
 }
 
 struct EmojiDataFile: Codable {
-    let version: String
+    let emojiVersion: String
+    let cldrVersion: String
     let categories: [EmojiCategory]
 }
 
@@ -36,21 +41,16 @@ class EmojiData: ObservableObject {
     let lookup: [String: EmojiItem]
 
     init() {
-        // JSONファイルから絵文字データを読み込み
-        var loadedCategories: [EmojiCategory] = []
-
-        if let url = Bundle.main.url(forResource: "emoji-data", withExtension: "json") {
-            do {
-                let data = try Data(contentsOf: url)
-                let decoded = try JSONDecoder().decode(EmojiDataFile.self, from: data)
-                loadedCategories = decoded.categories
-                let total = loadedCategories.reduce(0) { $0 + $1.emojis.count }
-                print("Loaded emoji data v\(decoded.version): \(total) emojis")
-            } catch {
-                print("Failed to load emoji data: \(error)")
-            }
-        } else {
-            print("emoji-data.json not found in bundle")
+        // JSONファイルから絵文字データを読み込む。バンドルに同梱したデータが読めないのはビルドの誤りなので停止する
+        guard let url = Bundle.main.url(forResource: "emoji-data", withExtension: "json") else {
+            fatalError("emoji-data.jsonがバンドルにありません")
+        }
+        let loadedCategories: [EmojiCategory]
+        do {
+            let data = try Data(contentsOf: url)
+            loadedCategories = try JSONDecoder().decode(EmojiDataFile.self, from: data).categories
+        } catch {
+            fatalError("emoji-data.jsonを読み込めません: \(error)")
         }
 
         // Favoritesカテゴリを先頭に追加（emojisは空：実行時にusageCountsから生成）
@@ -81,7 +81,7 @@ class EmojiData: ObservableObject {
     }
 
     /// お気に入り（使用頻度上位）を EmojiItem として返す。
-    /// usageCounts に未知の絵文字（旧データなど）があっても name="" でフォールバックする。
+    /// usageCountsにはピッカーで選んだ絵文字しか記録されないため、データにない絵文字があれば不整合として停止する。
     func getFavorites() -> [EmojiItem] {
         return usageCounts
             .sorted { lhs, rhs in
@@ -92,7 +92,10 @@ class EmojiData: ObservableObject {
             }
             .prefix(50)
             .map { entry in
-                lookup[entry.key] ?? EmojiItem(char: entry.key, name: "")
+                guard let item = lookup[entry.key] else {
+                    fatalError("使用回数に絵文字データにない絵文字があります: \(entry.key)")
+                }
+                return item
             }
     }
 }

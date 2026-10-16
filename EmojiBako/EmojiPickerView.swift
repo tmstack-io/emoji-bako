@@ -193,7 +193,7 @@ struct EmojiPickerView: View {
             .split(whereSeparator: { $0.isWhitespace })
             .map(String.init)
         return emojiData.allEmojis.filter { item in
-            let target = item.name.lowercased()
+            let target = item.englishName.lowercased()
             return tokens.allSatisfy { target.contains($0) }
         }
     }
@@ -377,7 +377,7 @@ struct EmojiButton: View {
                 )
         }
         .buttonStyle(.plain)
-        .help(item.name.isEmpty ? item.char : item.name)
+        .help(item.englishName)
     }
 }
 
