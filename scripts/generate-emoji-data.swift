@@ -16,6 +16,8 @@ let CLDR_VERSION = "45"
 let repoRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 let outputURL = repoRoot.appendingPathComponent("EmojiBako/emoji-data.json")
 let overridesURL = repoRoot.appendingPathComponent("data/reading-overrides.json")
+/// キーワード→読みの対応表。読みのレビューとscripts/check-readings.swiftの入力に使う
+let readingsURL = repoRoot.appendingPathComponent("data/readings.json")
 
 struct GenerationError: Error, CustomStringConvertible {
     let description: String
@@ -95,49 +97,102 @@ func containsKanji(_ s: String) -> Bool {
     s.unicodeScalars.contains { ("\u{4E00}"..."\u{9FFF}").contains($0) || ("\u{3400}"..."\u{4DBF}").contains($0) || $0 == "々" }
 }
 
-/// ひらがな・カタカナ・長音記号だけでできているかどうか
-func isKanaOnly(_ s: String) -> Bool {
-    s.unicodeScalars.allSatisfy { ("\u{3041}"..."\u{3096}").contains($0) || ("\u{30A1}"..."\u{30FA}").contains($0) || $0 == "ー" }
+/// ひらがなかどうか
+func isHiragana(_ scalar: Unicode.Scalar) -> Bool {
+    ("\u{3041}"..."\u{3096}").contains(scalar)
 }
 
-/// 漢字を含む文字列の読みをひらがなで返す。
-/// 漢字を含むトークンはCFStringTokenizerのローマ字読みをひらがなに変換する。
-/// かなだけのトークンは長音記号を保つためローマ字を経由せず直接ひらがなにし、それ以外（記号・英数字）はそのまま残す。
-func generateReading(_ text: String) throws -> String {
-    let cf = text as CFString
+/// 日本語の文字（漢字・ひらがな・カタカナ・長音記号）かどうか
+func isJapanese(_ scalar: Unicode.Scalar) -> Bool {
+    containsKanji(String(scalar)) || isHiragana(scalar) || ("\u{30A1}"..."\u{30FA}").contains(scalar) || scalar == "ー"
+}
+
+/// カタカナをひらがなに変換する（かな以外の文字と長音記号はそのまま）。
+/// ICUの変換（applyingTransform(.hiraganaToKatakana, reverse: true)）は「ター」を「たあ」に展開するため使わない
+func toHiragana(_ s: String) -> String {
+    var scalars = String.UnicodeScalarView()
+    for scalar in s.unicodeScalars {
+        // ァ（U+30A1）〜ヶ（U+30F6）は、0x60を引くと対応するひらがなになる
+        if ("\u{30A1}"..."\u{30F6}").contains(scalar), let hiragana = Unicode.Scalar(scalar.value - 0x60) {
+            scalars.append(hiragana)
+        } else {
+            scalars.append(scalar)
+        }
+    }
+    return String(scalars)
+}
+
+/// 日本語の文字だけでできた区間の読みを返す。
+/// トークナイザは渡した文字列全体から言語を推定するため、記号や数字を含めて渡すと
+/// 「旗: 中国」「1人」のような短い文字列が中国語と判定される。呼び出し側で日本語の区間だけに分けて渡す。
+func readJapaneseSegment(_ segment: String) throws -> String {
+    let cf = segment as CFString
     let tokenizer = CFStringTokenizerCreate(
         nil, cf, CFRange(location: 0, length: CFStringGetLength(cf)),
         kCFStringTokenizerUnitWordBoundary, Locale(identifier: "ja") as CFLocale
     )
-    let ns = text as NSString
+    let ns = segment as NSString
     var reading = ""
     var cursor = 0
     while CFStringTokenizerAdvanceToNextToken(tokenizer) != [] {
         let range = CFStringTokenizerGetCurrentTokenRange(tokenizer)
-        // トークンの間にある空白や記号はそのまま残す
-        reading += ns.substring(with: NSRange(location: cursor, length: range.location - cursor))
+        reading += toHiragana(ns.substring(with: NSRange(location: cursor, length: range.location - cursor)))
         let token = ns.substring(with: NSRange(location: range.location, length: range.length))
         if containsKanji(token) {
             guard let latin = CFStringTokenizerCopyCurrentTokenAttribute(tokenizer, kCFStringTokenizerAttributeLatinTranscription) as? String else {
-                throw GenerationError(description: "読みを取得できません: \(token)（\(text)）")
+                throw GenerationError(description: "読みを取得できません: \(token)")
             }
-            guard let hiragana = latin.applyingTransform(.latinToHiragana, reverse: false) else {
-                throw GenerationError(description: "ひらがなに変換できません: \(latin)（\(text)）")
+            // ヘボン式の長音記号をかな表記どおりの綴りに直す（そのまま変換すると tōkyō → とおきょお になる）。
+            // 「おお」と書く長音（ōkii → おおきい）は誤るが、LLMによるチェックと修正表で補う
+            let spelled = latin
+                .replacingOccurrences(of: "ā", with: "aa")
+                .replacingOccurrences(of: "ī", with: "ii")
+                .replacingOccurrences(of: "ū", with: "uu")
+                .replacingOccurrences(of: "ē", with: "ei")
+                .replacingOccurrences(of: "ō", with: "ou")
+            // 日本語の読みならここでASCIIだけになる。声調記号などが残るのは中国語と判定されたとき
+            guard spelled.unicodeScalars.allSatisfy(\.isASCII) else {
+                throw GenerationError(description: "中国語の読みと判定されました: \(token) → \(latin)")
             }
-            reading += hiragana
-        } else if isKanaOnly(token) {
-            guard let hiragana = token.applyingTransform(.hiraganaToKatakana, reverse: true) else {
-                throw GenerationError(description: "ひらがなに変換できません: \(token)（\(text)）")
+            guard let hiragana = spelled.applyingTransform(.latinToHiragana, reverse: false) else {
+                throw GenerationError(description: "ひらがなに変換できません: \(latin)")
             }
             reading += hiragana
         } else {
-            reading += token
+            // かなだけのトークンは、長音記号を保つためローマ字を経由せず直接ひらがなにする
+            reading += toHiragana(token)
         }
         cursor = range.location + range.length
     }
-    reading += ns.substring(from: cursor)
-    if containsKanji(reading) {
-        throw GenerationError(description: "読みに漢字が残っています: \(reading)（\(text)）")
+    reading += toHiragana(ns.substring(from: cursor))
+    return reading
+}
+
+/// 漢字を含む文字列の読みをひらがなで返す。
+/// 日本語の文字が続く区間ごとに読みを作り、それ以外（記号・英数字・空白）はそのまま残す。
+func generateReading(_ text: String) throws -> String {
+    var reading = ""
+    var segment = String.UnicodeScalarView()
+    var segmentIsJapanese = false
+    func flush() throws {
+        guard !segment.isEmpty else { return }
+        let s = String(segment)
+        reading += segmentIsJapanese ? (containsKanji(s) ? try readJapaneseSegment(s) : toHiragana(s)) : s
+        segment = String.UnicodeScalarView()
+    }
+    for scalar in text.unicodeScalars {
+        if isJapanese(scalar) != segmentIsJapanese {
+            try flush()
+            segmentIsJapanese = isJapanese(scalar)
+        }
+        segment.append(scalar)
+    }
+    try flush()
+
+    // 読みに使ってよいのは、ひらがな・長音記号と、元の文字列にある日本語以外の文字だけ
+    let passthrough = Set(text.unicodeScalars.filter { !isJapanese($0) })
+    if let invalid = reading.unicodeScalars.first(where: { !isHiragana($0) && $0 != "ー" && !passthrough.contains($0) }) {
+        throw GenerationError(description: "読みに想定外の文字（U+\(String(invalid.value, radix: 16, uppercase: true))）があります: \(text) → \(reading)")
     }
     return reading
 }
@@ -169,17 +224,23 @@ func loadOverrides() throws -> [String: String] {
     return try JSONDecoder().decode([String: String].self, from: data)
 }
 
-func buildCategories(emojiTest: String, annotations: [String: JapaneseAnnotation], overrides: [String: String]) throws -> [EmojiCategory] {
+func buildCategories(emojiTest: String, annotations: [String: JapaneseAnnotation], overrides: [String: String]) throws -> (categories: [EmojiCategory], readings: [String: String]) {
     var categories: [EmojiCategory] = []
     var currentCategoryIndex: Int?
     var usedOverrides = Set<String>()
+    var readingMap: [String: String] = [:]
 
     func reading(for keyword: String) throws -> String {
+        if let cached = readingMap[keyword] { return cached }
+        let result: String
         if let overridden = overrides[keyword] {
             usedOverrides.insert(keyword)
-            return overridden
+            result = overridden
+        } else {
+            result = try generateReading(keyword)
         }
-        return try generateReading(keyword)
+        readingMap[keyword] = result
+        return result
     }
 
     for line in emojiTest.components(separatedBy: "\n") {
@@ -233,7 +294,7 @@ func buildCategories(emojiTest: String, annotations: [String: JapaneseAnnotation
     if !unusedOverrides.isEmpty {
         throw GenerationError(description: "使われていない読みの修正があります: \(unusedOverrides.sorted())")
     }
-    return categories
+    return (categories, readingMap)
 }
 
 // MARK: - main
@@ -247,18 +308,20 @@ do {
     let overrides = try loadOverrides()
 
     print("Building emoji data...")
-    let categories = try buildCategories(emojiTest: emojiTest, annotations: annotations, overrides: overrides)
+    let (categories, readings) = try buildCategories(emojiTest: emojiTest, annotations: annotations, overrides: overrides)
 
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
     let output = EmojiDataFile(emojiVersion: EMOJI_VERSION, cldrVersion: CLDR_VERSION, categories: categories)
     try encoder.encode(output).write(to: outputURL)
+    try encoder.encode(readings).write(to: readingsURL)
 
     let all = categories.flatMap(\.emojis)
     print("\n✅ Generated \(outputURL.path)")
     print("   Unicode Emoji \(EMOJI_VERSION) / CLDR \(CLDR_VERSION)")
     print("   Total emojis: \(all.count)")
     print("   With readings: \(all.filter { !$0.readings.isEmpty }.count)")
+    print("   Unique keywords with readings: \(readings.count) → \(readingsURL.path)")
     print("   Reading overrides: \(overrides.count)")
     for category in categories {
         print("   - \(category.name): \(category.emojis.count)")
