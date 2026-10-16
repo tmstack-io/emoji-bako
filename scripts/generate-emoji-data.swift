@@ -139,7 +139,8 @@ func readJapaneseSegment(_ segment: String) throws -> String {
         reading += toHiragana(ns.substring(with: NSRange(location: cursor, length: range.location - cursor)))
         let token = ns.substring(with: NSRange(location: range.location, length: range.length))
         if containsKanji(token) {
-            guard let latin = CFStringTokenizerCopyCurrentTokenAttribute(tokenizer, kCFStringTokenizerAttributeLatinTranscription) as? String else {
+            // 辞書にない語（例: 妊夫）は空文字が返る
+            guard let latin = CFStringTokenizerCopyCurrentTokenAttribute(tokenizer, kCFStringTokenizerAttributeLatinTranscription) as? String, !latin.isEmpty else {
                 throw GenerationError(description: "読みを取得できません: \(token)")
             }
             // ヘボン式の長音記号をかな表記どおりの綴りに直す（そのまま変換すると tōkyō → とおきょお になる）。
