@@ -2,7 +2,10 @@ import SwiftUI
 import ServiceManagement
 
 struct SettingsView: View {
-    @State private var launchAtLogin: Bool = false
+    /// SMAppServiceの実際の状態（トグルはこれを表示し、操作のたびに読み直す）
+    @State private var launchAtLoginStatus = SMAppService.mainApp.status
+    /// 直近の「ログイン時に起動」の操作の失敗
+    @State private var launchAtLoginError: String?
     @AppStorage(UpdateChecker.autoCheckDefaultsKey) private var autoCheckUpdates = true
     @AppStorage(EmojiPaster.restoreDelayDefaultsKey) private var clipboardRestoreDelay = 1.0
     
@@ -10,11 +13,25 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 20) {
             // 一般設定
             GroupBox(label: Text("一般").fontWeight(.semibold)) {
-                Toggle("ログイン時に起動", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { _, newValue in
-                        setLaunchAtLogin(enabled: newValue)
+                VStack(alignment: .leading, spacing: 2) {
+                    Toggle("ログイン時に起動", isOn: Binding(
+                        get: { launchAtLoginStatus == .enabled || launchAtLoginStatus == .requiresApproval },
+                        set: { setLaunchAtLogin(enabled: $0) }
+                    ))
+                    if launchAtLoginStatus == .requiresApproval {
+                        HStack {
+                            Text("システム設定の「ログイン項目」で許可が必要です。")
+                            Button("ログイン項目を開く") { SMAppService.openSystemSettingsLoginItems() }
+                        }
+                        .font(.caption)
                     }
-                    .padding(.vertical, 4)
+                    if let launchAtLoginError {
+                        Text(launchAtLoginError)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                }
+                .padding(.vertical, 4)
                 Toggle("アップデートを自動で確認する", isOn: $autoCheckUpdates)
                     .padding(.vertical, 4)
                 VStack(alignment: .leading, spacing: 2) {
@@ -69,7 +86,7 @@ struct SettingsView: View {
         .padding(20)
         .frame(width: 350)
         .onAppear {
-            launchAtLogin = getLaunchAtLoginStatus()
+            launchAtLoginStatus = SMAppService.mainApp.status
         }
     }
     
@@ -80,9 +97,11 @@ struct SettingsView: View {
             } else {
                 try SMAppService.mainApp.unregister()
             }
+            launchAtLoginError = nil
         } catch {
-            print("Failed to \(enabled ? "enable" : "disable") launch at login: \(error)")
+            launchAtLoginError = String(localized: "ログイン時の起動を変更できませんでした: \(error.localizedDescription)")
         }
+        launchAtLoginStatus = SMAppService.mainApp.status
     }
     
     /// アプリに同梱したライセンス本文を既定のテキストエディタで開く。同梱はproject.ymlで保証しているので、なければビルドの誤りとして停止する
@@ -101,9 +120,6 @@ struct SettingsView: View {
         return version
     }
 
-    private func getLaunchAtLoginStatus() -> Bool {
-        return SMAppService.mainApp.status == .enabled
-    }
 }
 
 #Preview {

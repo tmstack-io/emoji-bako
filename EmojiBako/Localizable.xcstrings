@@ -361,6 +361,16 @@
         }
       }
     },
+    "システム設定の「ログイン項目」で許可が必要です。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approval is required in System Settings → Login Items."
+          }
+        }
+      }
+    },
     "システム設定を開く": {
       "localizations": {
         "en": {
@@ -417,6 +427,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Launch at login"
+          }
+        }
+      }
+    },
+    "ログイン時の起動を変更できませんでした: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not change launch at login: %@"
+          }
+        }
+      }
+    },
+    "ログイン項目を開く": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Login Items"
           }
         }
       }
