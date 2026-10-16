@@ -88,6 +88,10 @@ struct SettingsView: View {
         .onAppear {
             launchAtLoginStatus = SMAppService.mainApp.status
         }
+        // システム設定のログイン項目で許可して戻ってきたときに、表示を実際の状態に合わせる
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
+            launchAtLoginStatus = SMAppService.mainApp.status
+        }
     }
     
     private func setLaunchAtLogin(enabled: Bool) {

@@ -2,7 +2,6 @@
 // 選んだ絵文字を、クリップボードと⌘Vで作業中のアプリに入力する
 
 import AppKit
-import Carbon.HIToolbox
 
 final class EmojiPaster {
     static let shared = EmojiPaster()
@@ -33,13 +32,18 @@ final class EmojiPaster {
             pending.restore.cancel()
             snapshot = pending.snapshot
         } else {
+            // 待っている書き戻しがあっても、利用者が別の内容をコピーしたあとなので、その書き戻しは不要
+            pending?.restore.cancel()
             snapshot = PasteboardSnapshot(of: pasteboard)
         }
         let emojiChangeCount = PasteboardSnapshot.writeTransient(emoji, to: pasteboard)
 
         let restore = DispatchWorkItem { [weak self] in
             guard let self else { return }
-            self.pending = nil
+            // 後から選ばれた絵文字の待ち状態は消さない
+            if self.pending?.emojiChangeCount == emojiChangeCount {
+                self.pending = nil
+            }
             // 待つあいだに利用者が別の内容をコピーしていたら、そちらを残す
             if self.pasteboard.changeCount == emojiChangeCount {
                 snapshot.restore(to: self.pasteboard)
@@ -56,7 +60,7 @@ final class EmojiPaster {
     }
 
     static func sendCommandV() {
-        let keyCode = keyCodeForV()
+        let keyCode = KeyboardLayout.shortcutKeyCode(for: "v")
         let source = CGEventSource(stateID: .hidSystemState)
         for keyDown in [true, false] {
             guard let event = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: keyDown) else {
@@ -65,30 +69,5 @@ final class EmojiPaster {
             event.flags = .maskCommand
             event.post(tap: .cgAnnotatedSessionEventTap)
         }
-    }
-
-    /// ⌘ショートカットに使われる配列で「v」を入力するキーコード。
-    /// Dvorakなどでは「v」の位置がQWERTYと異なるため、物理的な位置（kVK_ANSI_V）ではなく配列から引く
-    static func keyCodeForV() -> CGKeyCode {
-        guard let source = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue(),
-              let layoutPointer = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData) else {
-            fatalError("キーボード配列を取得できません")
-        }
-        let layoutData = Unmanaged<CFData>.fromOpaque(layoutPointer).takeUnretainedValue() as Data
-        for keyCode in UInt16(0)...127 {
-            var deadKeyState: UInt32 = 0
-            var length = 0
-            var chars = [UniChar](repeating: 0, count: 4)
-            let status = layoutData.withUnsafeBytes { buffer in
-                UCKeyTranslate(
-                    buffer.bindMemory(to: UCKeyboardLayout.self).baseAddress, keyCode, UInt16(kUCKeyActionDown), 0,
-                    UInt32(LMGetKbdType()), OptionBits(kUCKeyTranslateNoDeadKeysBit), &deadKeyState, chars.count, &length, &chars
-                )
-            }
-            if status == noErr, length == 1, chars[0] == UniChar(UInt8(ascii: "v")) {
-                return CGKeyCode(keyCode)
-            }
-        }
-        fatalError("キーボード配列に「v」を入力するキーがありません")
     }
 }

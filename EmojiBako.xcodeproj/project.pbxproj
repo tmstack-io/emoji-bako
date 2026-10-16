@@ -26,6 +26,7 @@
 		BB159520AE58E978A256AF79 /* EmojiSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D93112423ABC244AAA0229 /* EmojiSearchTests.swift */; };
 		C014212CED240C8562ED11BB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */; };
 		D4BB0C086D9DEC38835823B1 /* PasteboardSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9984CA19ED51419159ABA998 /* PasteboardSnapshotTests.swift */; };
+		D81B7B62F6794110014958A4 /* KeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD625D3232917532D81B4D9 /* KeyboardLayout.swift */; };
 		E3449D1448D20DCB2FBB6948 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 2BEA41BB1778925E471FBAA4 /* Localizable.xcstrings */; };
 		EDAE66761BC7C53E2E27D4B6 /* EmojiBakoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F0647B9292700A3CEC3615 /* EmojiBakoApp.swift */; };
 		FA21B7F2F94C8C9CE597A36C /* emoji-data.json in Resources */ = {isa = PBXBuildFile; fileRef = 97B1BECC550EC0EE9CA42E1E /* emoji-data.json */; };
@@ -68,6 +69,7 @@
 		C2F0647B9292700A3CEC3615 /* EmojiBakoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBakoApp.swift; sourceTree = "<group>"; };
 		C5E29E711E654D9F941E3BFE /* SearchFieldTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchFieldTests.swift; sourceTree = "<group>"; };
 		C964300B53D09596DECA7C30 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		CBD625D3232917532D81B4D9 /* KeyboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
 		E14CFE618766D53A4E51601B /* EmojiBakoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EmojiBakoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -110,6 +112,7 @@
 				1914AF68886C66A348FEF60E /* HotKey.swift */,
 				AAF8AD7DF67488225D32AA9F /* HotKeyRecorder.swift */,
 				C964300B53D09596DECA7C30 /* Info.plist */,
+				CBD625D3232917532D81B4D9 /* KeyboardLayout.swift */,
 				2BEA41BB1778925E471FBAA4 /* Localizable.xcstrings */,
 				1F4083C9353D51C32DE9ECC3 /* PasteboardSnapshot.swift */,
 				61EF1705CD5202798282BDD9 /* SearchField.swift */,
@@ -235,6 +238,7 @@
 				0C83F7EDF6CF6722498C7243 /* EmojiSearch.swift in Sources */,
 				1535A6A4ECE02115A267532C /* HotKey.swift in Sources */,
 				5258A50E8CFE7483A0D698DE /* HotKeyRecorder.swift in Sources */,
+				D81B7B62F6794110014958A4 /* KeyboardLayout.swift in Sources */,
 				FDDCD1ECA9524568323A8269 /* PasteboardSnapshot.swift in Sources */,
 				36E8027A961D326B76317394 /* SearchField.swift in Sources */,
 				C014212CED240C8562ED11BB /* SettingsView.swift in Sources */,

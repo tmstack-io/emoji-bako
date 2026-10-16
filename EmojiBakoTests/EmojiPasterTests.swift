@@ -63,6 +63,25 @@ final class EmojiPasterTests: XCTestCase {
         XCTAssertEqual(pasteboard.string(forType: .string), "copied by user")
     }
 
+    /// 待つあいだに利用者がコピーしてから続けて2回選んでも、利用者のコピーが最後に戻る
+    func testUserCopyBetweenPastesSurvivesLaterPastes() {
+        pasteboard.clearContents()
+        pasteboard.setString("original", forType: .string)
+        let paster = EmojiPaster(pasteboard: pasteboard, defaults: defaults) {}
+
+        paster.paste("😀")  // 書き戻しは約0.15秒後
+        pasteboard.clearContents()
+        pasteboard.setString("copied by user", forType: .string)
+        defaults.set(0.5, forKey: EmojiPaster.restoreDelayDefaultsKey)
+        paster.paste("👍")  // 書き戻しは約0.6秒後
+        // 1回目の書き戻しが発火したあと、2回目の書き戻しより前に3回目を選ぶ
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        paster.paste("🎉")
+        RunLoop.main.run(until: Date().addingTimeInterval(1.0))
+
+        XCTAssertEqual(pasteboard.string(forType: .string), "copied by user")
+    }
+
     func testRestoredContentIsMarkedTransient() {
         pasteboard.clearContents()
         pasteboard.setString("original", forType: .string)

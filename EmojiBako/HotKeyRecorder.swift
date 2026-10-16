@@ -49,6 +49,7 @@ struct HotKeyRecorder: View {
                     rejection = error
                     return
                 }
+                rejection = nil
                 store.save(hotKey)
                 stopRecording()
             },

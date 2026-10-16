@@ -245,8 +245,8 @@ struct EmojiPickerView: View {
         }
 
         // Cmd+F は検索モードのトグル（通常モード/検索モードどちらでも消費）。
-        // Dvorakなどではキーの位置が異なるため、キーコードではなく文字で判定する
-        if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers?.lowercased() == "f" {
+        // Dvorakやロシア語配列などに対応するため、⌘ショートカットに使われる配列で「f」を入力するキーで判定する
+        if event.modifierFlags.contains(.command) && event.keyCode == KeyboardLayout.shortcutKeyCode(for: "f") {
             if isSearching {
                 exitSearch()
             } else {
