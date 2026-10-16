@@ -26,6 +26,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var eventMonitor: Any?
     var hotKeyRef: EventHotKeyRef?
     var previousApp: NSRunningApplication?
+    let accessibilityOnboarding = AccessibilityOnboardingController()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Dockアイコンを非表示
@@ -45,6 +46,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         
         // グローバルホットキーを登録 (Cmd + .)
         registerHotKey()
+
+        // 絵文字の入力にはアクセシビリティ権限が必要なため、未許可なら起動時に案内する
+        if !AccessibilityPermission.isGranted {
+            accessibilityOnboarding.show()
+        }
         
         // 外側クリックで閉じる
         eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
@@ -119,9 +125,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         
         guard let window = floatingWindow else { return }
         
-        let contentView = EmojiPickerView(onClose: { [weak self] in
-            self?.hideWindowAndPaste()
-        })
+        let contentView = EmojiPickerView(
+            onClose: { [weak self] in
+                self?.hideWindowAndPaste()
+            },
+            onAccessibilityMissing: { [weak self] in
+                self?.accessibilityOnboarding.show()
+            }
+        )
         
         window.contentViewController = NSHostingController(rootView: contentView)
         window.isOpaque = false

@@ -15,6 +15,8 @@ struct EmojiPickerView: View {
     @State private var keyMonitor: Any?
 
     var onClose: (() -> Void)? = nil
+    /// アクセシビリティ権限がないまま絵文字が選ばれたときに呼ぶ（ピッカーは閉じたあと）
+    var onAccessibilityMissing: (() -> Void)? = nil
 
     private let columns = Array(repeating: GridItem(.fixed(36), spacing: 4), count: 8)
 
@@ -184,6 +186,12 @@ struct EmojiPickerView: View {
     // MARK: - 選択・貼り付け
 
     private func selectEmoji(_ item: EmojiItem) {
+        // 権限がないと⌘Vを送れず何も起きないため、クリップボードには触らずに案内を出す
+        guard AccessibilityPermission.isGranted else {
+            onClose?()
+            onAccessibilityMissing?()
+            return
+        }
         let emoji = item.char
         emojiData.incrementUsage(for: emoji)
 

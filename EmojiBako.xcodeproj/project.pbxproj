@@ -10,6 +10,7 @@
 		0C83F7EDF6CF6722498C7243 /* EmojiSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10861523A6F49931D0C396 /* EmojiSearch.swift */; };
 		36E8027A961D326B76317394 /* SearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61EF1705CD5202798282BDD9 /* SearchField.swift */; };
 		3CB54E56B2E59453FF1C5416 /* SearchFieldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E29E711E654D9F941E3BFE /* SearchFieldTests.swift */; };
+		47FEDA7DADE54FCB3EC17A93 /* AccessibilityPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68DB8CDB301819C8CF0C3149 /* AccessibilityPermission.swift */; };
 		7E3EEF8A209F2C7623DAFF32 /* EmojiData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 788AB52F4B460C230DBA12C8 /* EmojiData.swift */; };
 		A1BA9B8C89FA5A646975318D /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD62D596F994A1826B7172B1 /* EmojiPickerView.swift */; };
 		AAC103F561770622B8BACEED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 048FC01CA25F8B40465A0C07 /* Assets.xcassets */; };
@@ -36,6 +37,7 @@
 		1F4083C9353D51C32DE9ECC3 /* PasteboardSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardSnapshot.swift; sourceTree = "<group>"; };
 		40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		61EF1705CD5202798282BDD9 /* SearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchField.swift; sourceTree = "<group>"; };
+		68DB8CDB301819C8CF0C3149 /* AccessibilityPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermission.swift; sourceTree = "<group>"; };
 		788AB52F4B460C230DBA12C8 /* EmojiData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiData.swift; sourceTree = "<group>"; };
 		78DC0583C24893DF16C03ECF /* EmojiBako.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmojiBako.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84D93112423ABC244AAA0229 /* EmojiSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSearchTests.swift; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 		6838AF854AB7CD533598C0FA /* EmojiBako */ = {
 			isa = PBXGroup;
 			children = (
+				68DB8CDB301819C8CF0C3149 /* AccessibilityPermission.swift */,
 				048FC01CA25F8B40465A0C07 /* Assets.xcassets */,
 				97B1BECC550EC0EE9CA42E1E /* emoji-data.json */,
 				C2F0647B9292700A3CEC3615 /* EmojiBakoApp.swift */,
@@ -190,6 +193,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				47FEDA7DADE54FCB3EC17A93 /* AccessibilityPermission.swift in Sources */,
 				EDAE66761BC7C53E2E27D4B6 /* EmojiBakoApp.swift in Sources */,
 				7E3EEF8A209F2C7623DAFF32 /* EmojiData.swift in Sources */,
 				A1BA9B8C89FA5A646975318D /* EmojiPickerView.swift in Sources */,
