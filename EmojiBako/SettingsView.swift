@@ -4,6 +4,7 @@ import ServiceManagement
 struct SettingsView: View {
     @State private var launchAtLogin: Bool = false
     @AppStorage(UpdateChecker.autoCheckDefaultsKey) private var autoCheckUpdates = true
+    @AppStorage(EmojiPaster.restoreDelayDefaultsKey) private var clipboardRestoreDelay = 1.0
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -16,6 +17,17 @@ struct SettingsView: View {
                     .padding(.vertical, 4)
                 Toggle("アップデートを自動で確認する", isOn: $autoCheckUpdates)
                     .padding(.vertical, 4)
+                VStack(alignment: .leading, spacing: 2) {
+                    Picker("クリップボードを元に戻すまでの時間", selection: $clipboardRestoreDelay) {
+                        ForEach(EmojiPaster.restoreDelayChoices, id: \.self) { seconds in
+                            Text("\(seconds.formatted())秒").tag(seconds)
+                        }
+                    }
+                    Text("絵文字ではなく元の内容が貼り付けられる場合は、長くしてください。")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.vertical, 4)
             }
             
             // キーボード

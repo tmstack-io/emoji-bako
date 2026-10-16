@@ -1,6 +1,16 @@
 {
   "sourceLanguage": "ja",
   "strings": {
+    "%@秒": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ s"
+          }
+        }
+      }
+    },
     "Activities": {
       "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
       "extractionState": "manual",
@@ -341,6 +351,16 @@
         }
       }
     },
+    "クリップボードを元に戻すまでの時間": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore clipboard after"
+          }
+        }
+      }
+    },
     "システム設定を開く": {
       "localizations": {
         "en": {
@@ -447,6 +467,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quit"
+          }
+        }
+      }
+    },
+    "絵文字ではなく元の内容が貼り付けられる場合は、長くしてください。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Increase this if the previous clipboard content gets pasted instead of the emoji."
           }
         }
       }

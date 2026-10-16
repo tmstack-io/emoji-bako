@@ -195,36 +195,9 @@ struct EmojiPickerView: View {
         let emoji = item.char
         emojiData.incrementUsage(for: emoji)
 
-        // 元のクリップボードを全形式のまま退避し、絵文字を一時的に置く
-        let pasteboard = NSPasteboard.general
-        let snapshot = PasteboardSnapshot(of: pasteboard)
-        let emojiChangeCount = PasteboardSnapshot.writeTransient(emoji, to: pasteboard)
-
         // ウィンドウを閉じる（元アプリにフォーカスが戻る）
         onClose?()
-
-        // 少し待ってからCmd+Vを送信
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            let source = CGEventSource(stateID: .hidSystemState)
-
-            // V key = 0x09
-            if let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: true) {
-                keyDown.flags = .maskCommand
-                keyDown.post(tap: .cgAnnotatedSessionEventTap)
-            }
-
-            if let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 0x09, keyDown: false) {
-                keyUp.flags = .maskCommand
-                keyUp.post(tap: .cgAnnotatedSessionEventTap)
-            }
-
-            // 元のクリップボードを復元する。待つあいだに利用者が別の内容をコピーしていたら、そちらを残す
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                if pasteboard.changeCount == emojiChangeCount {
-                    snapshot.restore(to: pasteboard)
-                }
-            }
-        }
+        EmojiPaster.shared.paste(emoji)
     }
 
     // MARK: - 検索モード制御

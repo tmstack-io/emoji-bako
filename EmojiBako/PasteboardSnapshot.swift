@@ -29,7 +29,8 @@ struct PasteboardSnapshot {
         return pasteboard.changeCount
     }
 
-    /// 退避した内容を書き戻す。退避時にクリップボードが空だった場合は空に戻す
+    /// 退避した内容を書き戻す。退避時にクリップボードが空だった場合は空に戻す。
+    /// 書き戻しを新しいコピーとしてクリップボード管理アプリの履歴に残さないよう、各項目にtransientTypeを付ける
     func restore(to pasteboard: NSPasteboard) {
         pasteboard.clearContents()
         let restored = items.map { types in
@@ -37,6 +38,7 @@ struct PasteboardSnapshot {
             for (type, data) in types {
                 item.setData(data, forType: type)
             }
+            item.setData(Data(), forType: Self.transientType)
             return item
         }
         pasteboard.writeObjects(restored)
