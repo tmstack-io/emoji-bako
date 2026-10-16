@@ -265,6 +265,7 @@ emoji-picker/
 │   ├── EmojiSearch.swift          # 検索（正規化、索引、並び順）
 │   ├── SearchField.swift          # 変換中の文字列も通知する検索欄
 │   ├── EmojiPaster.swift          # クリップボードと⌘Vによる絵文字の入力
+│   ├── KeyboardLayout.swift       # ⌘ショートカットに使われる配列での文字とキーコードの対応
 │   ├── PasteboardSnapshot.swift   # クリップボードの退避と復元
 │   ├── AccessibilityPermission.swift # アクセシビリティ権限の確認と案内
 │   ├── HotKey.swift               # ホットキーの定義、検証、保存、登録
