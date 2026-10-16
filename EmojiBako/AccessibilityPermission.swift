@@ -20,6 +20,7 @@ enum AccessibilityPermission {
 final class AccessibilityOnboardingController {
     private var window: NSWindow?
     private var timer: Timer?
+    private var closeObserver: NSObjectProtocol?
 
     func show() {
         if window == nil {
@@ -32,6 +33,10 @@ final class AccessibilityOnboardingController {
             window.styleMask = [.titled, .closable]
             window.isReleasedWhenClosed = false
             window.center()
+            // 閉じるボタンで閉じたときも確認のタイマーを止める
+            closeObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
+                self?.stopTimer()
+            }
             self.window = window
         }
         window?.makeKeyAndOrderFront(nil)
@@ -46,9 +51,13 @@ final class AccessibilityOnboardingController {
     }
 
     private func close() {
+        stopTimer()
+        window?.close()
+    }
+
+    private func stopTimer() {
         timer?.invalidate()
         timer = nil
-        window?.close()
     }
 }
 

@@ -1,7 +1,7 @@
 // UpdateChecker.swift
 // GitHub Releasesで新しいバージョンを確認し、利用者に知らせる（インストールは利用者が手動で行う）
 
-import AppKit
+import SwiftUI
 import os
 
 /// 「1.2.3」「v1.2.3」形式のバージョン
@@ -42,6 +42,7 @@ final class UpdateChecker {
     private let logger = Logger(subsystem: "io.tmstack.EmojiBako", category: "UpdateChecker")
     private let defaults: UserDefaults
     private var timer: Timer?
+    private var notificationWindow: NSWindow?
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -94,16 +95,52 @@ final class UpdateChecker {
         notify(latest: latest, current: current, page: release.html_url)
     }
 
+    /// モーダルのNSAlertはピッカーなどほかのウィンドウの入力を止めてしまうため、通常のウィンドウで知らせる
     @MainActor
     private func notify(latest: AppVersion, current: AppVersion, page: URL) {
-        let alert = NSAlert()
-        alert.messageText = String(localized: "EmojiBako \(latest.description)が公開されています")
-        alert.informativeText = String(localized: "現在のバージョンは\(current.description)です。ダウンロードページから新しいDMGを入手し、アプリを置き換えてください。")
-        alert.addButton(withTitle: String(localized: "ダウンロードページを開く"))
-        alert.addButton(withTitle: String(localized: "あとで"))
+        notificationWindow?.close()
+        let view = UpdateNotificationView(
+            latest: latest.description,
+            current: current.description,
+            onOpen: { [weak self] in
+                NSWorkspace.shared.open(page)
+                self?.notificationWindow?.close()
+            },
+            onLater: { [weak self] in self?.notificationWindow?.close() }
+        )
+        let window = NSWindow(contentViewController: NSHostingController(rootView: view))
+        window.title = "EmojiBako"
+        window.styleMask = [.titled, .closable]
+        window.isReleasedWhenClosed = false
+        // メニューバー常駐アプリは前面に出られないことがあるため、浮かせて気づけるようにする
+        window.level = .floating
+        window.center()
+        window.makeKeyAndOrderFront(nil)
         NSApp.activate()
-        if alert.runModal() == .alertFirstButtonReturn {
-            NSWorkspace.shared.open(page)
+        notificationWindow = window
+    }
+}
+
+struct UpdateNotificationView: View {
+    let latest: String
+    let current: String
+    let onOpen: () -> Void
+    let onLater: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("EmojiBako \(latest)が公開されています")
+                .font(.headline)
+            Text("現在のバージョンは\(current)です。ダウンロードページから新しいDMGを入手し、アプリを置き換えてください。")
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Spacer()
+                Button("あとで", action: onLater)
+                Button("ダウンロードページを開く", action: onOpen)
+                    .keyboardShortcut(.defaultAction)
+            }
         }
+        .padding(20)
+        .frame(width: 400)
     }
 }
