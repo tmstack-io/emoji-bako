@@ -6,7 +6,7 @@ import Carbon.HIToolbox
 
 struct HotKeyRecorder: View {
     @ObservedObject var store: HotKeyStore
-    @State private var monitor: Any?
+    @State private var session: RecordingSession?
     /// 記録しようとしたキーが使えなかった理由
     @State private var rejection: HotKeyValidationError?
 
@@ -28,33 +28,65 @@ struct HotKeyRecorder: View {
                     .foregroundColor(.red)
             }
         }
-        .onDisappear { stopRecording() }
     }
 
     private func startRecording() {
+        // 記録ボタンを押したウィンドウ（設定画面）
+        guard let window = NSApp.keyWindow else {
+            fatalError("記録ボタンを押したウィンドウがキーウィンドウになっていません")
+        }
         rejection = nil
         store.isRecording = true
-        monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            if event.keyCode == UInt16(kVK_Escape) && event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty {
+        session = RecordingSession(
+            window: window,
+            onKeyDown: { event in
+                if event.keyCode == UInt16(kVK_Escape) && event.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty {
+                    stopRecording()
+                    return
+                }
+                let hotKey = HotKey(event: event)
+                if let error = HotKeyValidator.validate(hotKey) {
+                    rejection = error
+                    return
+                }
+                store.save(hotKey)
                 stopRecording()
-                return nil
-            }
-            let hotKey = HotKey(event: event)
-            if let error = HotKeyValidator.validate(hotKey) {
-                rejection = error
-                return nil
-            }
-            store.save(hotKey)
-            stopRecording()
-            return nil
-        }
+            },
+            // NSWindowを閉じてもSwiftUIのonDisappearは呼ばれないため、ウィンドウの通知で記録を止める
+            onEnd: { stopRecording() }
+        )
     }
 
     private func stopRecording() {
+        session?.invalidate()
+        session = nil
+        store.isRecording = false
+    }
+}
+
+/// 記録中だけ有効なキー入力の監視。記録を始めたウィンドウ宛ての入力だけを奪い、
+/// そのウィンドウが閉じるかキーウィンドウでなくなったら記録を終える
+private final class RecordingSession {
+    private var monitor: Any?
+    private var observers: [NSObjectProtocol] = []
+
+    init(window: NSWindow, onKeyDown: @escaping (NSEvent) -> Void, onEnd: @escaping () -> Void) {
+        monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak window] event in
+            guard let window, event.window === window else { return event }
+            onKeyDown(event)
+            return nil
+        }
+        for name in [NSWindow.willCloseNotification, NSWindow.didResignKeyNotification] {
+            observers.append(NotificationCenter.default.addObserver(forName: name, object: window, queue: .main) { _ in onEnd() })
+        }
+    }
+
+    func invalidate() {
         if let monitor {
             NSEvent.removeMonitor(monitor)
             self.monitor = nil
         }
-        store.isRecording = false
+        observers.forEach(NotificationCenter.default.removeObserver)
+        observers = []
     }
 }

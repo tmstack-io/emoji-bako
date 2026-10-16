@@ -40,7 +40,13 @@ struct HotKey: Codable, Equatable {
         if carbonModifiers & UInt32(optionKey) != 0 { result += "⌥" }
         if carbonModifiers & UInt32(shiftKey) != 0 { result += "⇧" }
         if carbonModifiers & UInt32(cmdKey) != 0 { result += "⌘" }
-        return result + Self.keyName(for: keyCode)
+        // 表示名を引けないキーは記録時に拒否しているが、記録後にキーボード配列を変えた場合に備えてキーコードで示す
+        return result + (Self.keyName(for: keyCode) ?? "#\(keyCode)")
+    }
+
+    /// 表示できる名前があるキーか（ホットキーとして記録してよいか）
+    var hasDisplayableKey: Bool {
+        Self.keyName(for: keyCode) != nil
     }
 
     /// 文字を入力しないキーの表示名
@@ -50,11 +56,15 @@ struct HotKey: Codable, Equatable {
         kVK_Home: "↖", kVK_End: "↘", kVK_PageUp: "⇞", kVK_PageDown: "⇟",
         kVK_F1: "F1", kVK_F2: "F2", kVK_F3: "F3", kVK_F4: "F4", kVK_F5: "F5", kVK_F6: "F6",
         kVK_F7: "F7", kVK_F8: "F8", kVK_F9: "F9", kVK_F10: "F10", kVK_F11: "F11", kVK_F12: "F12",
+        kVK_F13: "F13", kVK_F14: "F14", kVK_F15: "F15", kVK_F16: "F16", kVK_F17: "F17", kVK_F18: "F18",
+        kVK_F19: "F19", kVK_F20: "F20",
+        kVK_ANSI_KeypadEnter: "⌤", kVK_ANSI_KeypadClear: "⌧", kVK_Help: "Help",
         kVK_JIS_Eisu: "英数", kVK_JIS_Kana: "かな",
     ]
 
-    /// 現在のキーボード配列でキーコードが入力する文字（配列によって表示が変わるため毎回引く）
-    private static func keyName(for keyCode: UInt32) -> String {
+    /// 現在のキーボード配列でキーコードが入力する文字（配列によって表示が変わるため毎回引く）。
+    /// 文字を返さないキーや制御文字・機能キー用の私用領域（U+F700台）を返すキーはnil
+    private static func keyName(for keyCode: UInt32) -> String? {
         if let name = specialKeyNames[Int(keyCode)] { return name }
         guard let source = TISCopyCurrentKeyboardLayoutInputSource()?.takeRetainedValue(),
               let layoutPointer = TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData) else {
@@ -70,21 +80,25 @@ struct HotKey: Codable, Equatable {
                 UInt32(LMGetKbdType()), OptionBits(kUCKeyTranslateNoDeadKeysBit), &deadKeyState, chars.count, &length, &chars
             )
         }
-        guard status == noErr, length > 0 else {
+        guard status == noErr else {
             fatalError("キーコード\(keyCode)の文字を取得できません（\(status)）")
         }
+        let printable = (0..<length).allSatisfy { chars[$0] >= 0x20 && chars[$0] != 0x7F && !(0xF700...0xF8FF).contains(chars[$0]) }
+        guard length > 0, printable else { return nil }
         return String(utf16CodeUnits: chars, count: length).uppercased()
     }
 }
 
 enum HotKeyValidationError: LocalizedError, Equatable {
     case missingModifier
+    case unsupportedKey
     case reservedBySystem
     case registrationFailed(OSStatus)
 
     var errorDescription: String? {
         switch self {
         case .missingModifier: return String(localized: "⌘・⌥・⌃のいずれかを含めてください")
+        case .unsupportedKey: return String(localized: "このキーはショートカットに使えません")
         case .reservedBySystem: return String(localized: "macOSのショートカットで使われています")
         case .registrationFailed(let status): return String(localized: "ホットキーを登録できませんでした（\(Int(status))）")
         }
@@ -96,6 +110,7 @@ enum HotKeyValidator {
     /// 他のアプリが登録したホットキーとの重複は、macOSが情報を提供しないため検出できない
     static func validate(_ hotKey: HotKey) -> HotKeyValidationError? {
         if !hotKey.hasRequiredModifier { return .missingModifier }
+        if !hotKey.hasDisplayableKey { return .unsupportedKey }
         if systemHotKeys().contains(hotKey) { return .reservedBySystem }
         return nil
     }

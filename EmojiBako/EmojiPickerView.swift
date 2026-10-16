@@ -243,8 +243,7 @@ struct EmojiPickerView: View {
     // MARK: - キーボードハンドリング
 
     private func setupKeyboardHandler() {
-        // ウィンドウを開閉するたびに onAppear が呼ばれるため、
-        // モニターを保持していなければ多重登録される。既存があればまず解除する。
+        // NSWindowの開閉ではonAppearは呼ばれないが、ビューが作り直されたときに多重登録しないよう、既存があればまず解除する。
         teardownKeyboardHandler()
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             return self.handleKeyEvent(event)

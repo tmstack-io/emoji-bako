@@ -33,6 +33,22 @@ final class HotKeyTests: XCTestCase {
         XCTAssertEqual(HotKeyValidator.validate(HotKey(keyCode: UInt32(kVK_ANSI_A), carbonModifiers: 0)), .missingModifier)
     }
 
+    func testFunctionKeysAboveF12HaveNames() {
+        XCTAssertEqual(HotKey(keyCode: UInt32(kVK_F18), carbonModifiers: UInt32(cmdKey)).displayString, "⌘F18")
+        XCTAssertEqual(HotKey(keyCode: UInt32(kVK_ANSI_KeypadEnter), carbonModifiers: UInt32(cmdKey)).displayString, "⌘⌤")
+    }
+
+    /// どのキーを押しても表示でクラッシュせず、表示名のないキーは記録前に拒否される
+    func testEveryKeyCodeIsDisplayableOrRejected() {
+        for keyCode in UInt32(0)...127 {
+            let hotKey = HotKey(keyCode: keyCode, carbonModifiers: UInt32(cmdKey))
+            XCTAssertFalse(hotKey.displayString.isEmpty)
+            if !hotKey.hasDisplayableKey {
+                XCTAssertEqual(HotKeyValidator.validate(hotKey), .unsupportedKey, "keyCode \(keyCode)")
+            }
+        }
+    }
+
     func testStoreUsesDefaultUntilSavedAndPersists() throws {
         let suiteName = "EmojiBakoTests-\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))

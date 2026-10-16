@@ -271,6 +271,16 @@
         }
       }
     },
+    "このキーはショートカットに使えません": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This key can't be used for a shortcut"
+          }
+        }
+      }
+    },
     "アクセシビリティの許可が必要です": {
       "localizations": {
         "en": {
