@@ -7,14 +7,15 @@
 # 事前に必要なもの（初回だけ）:
 #   1. Developer ID Application証明書（Xcode > Settings > Accounts > Manage Certificates > ＋ > Developer ID Application）
 #   2. 公証用の認証情報をキーチェーンに保存する（Apple IDのApp用パスワードを使う）:
-#        xcrun notarytool store-credentials EmojiBako --apple-id <Apple ID> --team-id PCUA32D2L3
+#        xcrun notarytool store-credentials notary-PCUA32D2L3 --apple-id <Apple ID> --team-id PCUA32D2L3
+#      App用パスワードはMacごとに「notarytool-<Mac名>」の名前で発行し、プロファイルはチームごとに1つ（全アプリ共通）とする。
 #      プロファイル名を変える場合は、環境変数NOTARY_PROFILEで指定する。
 #
 # 公証はアプリとDMGの両方に行い、両方にチケットをステープルする（オフラインでも初回起動の検証が通るように）。
 set -euo pipefail
 
 TEAM_ID="PCUA32D2L3"
-NOTARY_PROFILE="${NOTARY_PROFILE:-EmojiBako}"
+NOTARY_PROFILE="${NOTARY_PROFILE:-notary-${TEAM_ID}}"
 ROOT="${0:A:h:h}"
 OUT="$ROOT/build/release"
 
