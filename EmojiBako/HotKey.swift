@@ -168,7 +168,8 @@ final class HotKeyStore: ObservableObject {
     }
 }
 
-/// Carbonのホットキー登録を1つだけ管理する
+/// Carbonのホットキー登録を1つだけ管理する。
+/// イベントハンドラにはselfを保持せずに渡し、ハンドラも外さないため、アプリの寿命のあいだ1つだけ作って保持し続けること（AppDelegateが保持する）
 final class HotKeyRegistrar {
     private var hotKeyRef: EventHotKeyRef?
     private var handlerInstalled = false
