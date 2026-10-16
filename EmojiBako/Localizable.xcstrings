@@ -57,6 +57,16 @@
         }
       }
     },
+    "EmojiBakoはMITライセンスで公開しています。絵文字の名前とキーワードには、Unicode, Inc.のデータ（Unicode License v3）を使用しています。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EmojiBako is released under the MIT License. Emoji names and keywords use data from Unicode, Inc. (Unicode License v3)."
+          }
+        }
+      }
+    },
     "EmojiBakoは、選んだ絵文字を作業中のアプリに入力するために、⌘Vのキー操作を送ります。システム設定の「プライバシーとセキュリティ」→「アクセシビリティ」で、EmojiBakoを許可してください。": {
       "localizations": {
         "en": {
@@ -117,6 +127,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "食べ物と飲み物"
+          }
+        }
+      }
+    },
+    "MITライセンス": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MIT License"
           }
         }
       }
@@ -211,6 +231,16 @@
         }
       }
     },
+    "Unicodeライセンス": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unicode License"
+          }
+        }
+      }
+    },
     "macOSのショートカットで使われています": {
       "localizations": {
         "en": {
@@ -257,6 +287,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Automatically check for updates"
+          }
+        }
+      }
+    },
+    "ウェブサイト": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Website"
           }
         }
       }

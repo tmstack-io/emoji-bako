@@ -12,8 +12,10 @@
 		36E8027A961D326B76317394 /* SearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61EF1705CD5202798282BDD9 /* SearchField.swift */; };
 		3CB54E56B2E59453FF1C5416 /* SearchFieldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E29E711E654D9F941E3BFE /* SearchFieldTests.swift */; };
 		47FEDA7DADE54FCB3EC17A93 /* AccessibilityPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68DB8CDB301819C8CF0C3149 /* AccessibilityPermission.swift */; };
+		4CACE726EEA9583686F3E91D /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 7FCEFA50FA8A52470A66DC4D /* LICENSE */; };
 		50C5B3A66D4543E3D66B1600 /* UpdateCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8129EF15F41A0D80C87DA88 /* UpdateCheckerTests.swift */; };
 		5258A50E8CFE7483A0D698DE /* HotKeyRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF8AD7DF67488225D32AA9F /* HotKeyRecorder.swift */; };
+		54390D7888B7D6921A208B44 /* LICENSE-UNICODE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 556649683CCC51A0B700BBF2 /* LICENSE-UNICODE.txt */; };
 		6734909E5F262A3989C7A4EF /* HotKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDEF9B0DED93577CA4686B0 /* HotKeyTests.swift */; };
 		7E3EEF8A209F2C7623DAFF32 /* EmojiData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 788AB52F4B460C230DBA12C8 /* EmojiData.swift */; };
 		A1BA9B8C89FA5A646975318D /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD62D596F994A1826B7172B1 /* EmojiPickerView.swift */; };
@@ -44,12 +46,14 @@
 		1F4083C9353D51C32DE9ECC3 /* PasteboardSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardSnapshot.swift; sourceTree = "<group>"; };
 		2BEA41BB1778925E471FBAA4 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		556649683CCC51A0B700BBF2 /* LICENSE-UNICODE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LICENSE-UNICODE.txt"; sourceTree = "<group>"; };
 		5DDEF9B0DED93577CA4686B0 /* HotKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyTests.swift; sourceTree = "<group>"; };
 		61EF1705CD5202798282BDD9 /* SearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchField.swift; sourceTree = "<group>"; };
 		62C5469005528D78ACEA1119 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		68DB8CDB301819C8CF0C3149 /* AccessibilityPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermission.swift; sourceTree = "<group>"; };
 		788AB52F4B460C230DBA12C8 /* EmojiData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiData.swift; sourceTree = "<group>"; };
 		78DC0583C24893DF16C03ECF /* EmojiBako.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmojiBako.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7FCEFA50FA8A52470A66DC4D /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
 		84D93112423ABC244AAA0229 /* EmojiSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSearchTests.swift; sourceTree = "<group>"; };
 		97B1BECC550EC0EE9CA42E1E /* emoji-data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "emoji-data.json"; sourceTree = "<group>"; };
 		9984CA19ED51419159ABA998 /* PasteboardSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardSnapshotTests.swift; sourceTree = "<group>"; };
@@ -67,6 +71,8 @@
 		095FC3052F7946F615EAC407 = {
 			isa = PBXGroup;
 			children = (
+				7FCEFA50FA8A52470A66DC4D /* LICENSE */,
+				556649683CCC51A0B700BBF2 /* LICENSE-UNICODE.txt */,
 				6838AF854AB7CD533598C0FA /* EmojiBako */,
 				09F733D46109B1B6505FDD0F /* EmojiBakoTests */,
 				AEF809D206728A5F0E36112A /* Products */,
@@ -180,6 +186,7 @@
 			knownRegions = (
 				Base,
 				en,
+				ja,
 			);
 			mainGroup = 095FC3052F7946F615EAC407;
 			minimizedProjectReferenceProxies = 1;
@@ -200,6 +207,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				AAC103F561770622B8BACEED /* Assets.xcassets in Resources */,
+				4CACE726EEA9583686F3E91D /* LICENSE in Resources */,
+				54390D7888B7D6921A208B44 /* LICENSE-UNICODE.txt in Resources */,
 				E3449D1448D20DCB2FBB6948 /* Localizable.xcstrings in Resources */,
 				FA21B7F2F94C8C9CE597A36C /* emoji-data.json in Resources */,
 			);

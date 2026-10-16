@@ -37,6 +37,20 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
                 .padding(.vertical, 4)
+                Link("ウェブサイト", destination: URL(string: "https://tmstack-io.github.io/EmojiBako/")!)
+                    .padding(.vertical, 2)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("EmojiBakoはMITライセンスで公開しています。絵文字の名前とキーワードには、Unicode, Inc.のデータ（Unicode License v3）を使用しています。")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack {
+                        Button("MITライセンス") { openBundledLicense("LICENSE", extension: nil) }
+                        Button("Unicodeライセンス") { openBundledLicense("LICENSE-UNICODE", extension: "txt") }
+                    }
+                    .controlSize(.small)
+                }
+                .padding(.vertical, 4)
             }
             
         }
@@ -59,6 +73,14 @@ struct SettingsView: View {
         }
     }
     
+    /// アプリに同梱したライセンス本文を既定のテキストエディタで開く。同梱はproject.ymlで保証しているので、なければビルドの誤りとして停止する
+    private func openBundledLicense(_ name: String, extension ext: String?) {
+        guard let url = Bundle.main.url(forResource: name, withExtension: ext) else {
+            fatalError("\(name)がバンドルにありません")
+        }
+        NSWorkspace.shared.open(url)
+    }
+
     /// Info.plistのCFBundleShortVersionString。project.ymlで必ず設定されるため、欠けていればビルド設定の誤りとして停止する
     private var appVersion: String {
         guard let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String else {
