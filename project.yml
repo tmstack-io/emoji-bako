@@ -31,3 +31,20 @@ targets:
         MACOSX_DEPLOYMENT_TARGET: "14.4"
     scheme:
       gatherCoverageData: false
+      testTargets:
+        - EmojiBakoTests
+  EmojiBakoTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - EmojiBakoTests
+    dependencies:
+      - target: EmojiBako
+    settings:
+      base:
+        DEVELOPMENT_TEAM: PCUA32D2L3
+        CODE_SIGN_STYLE: Automatic
+        ARCHS: arm64
+        SWIFT_VERSION: "5.0"
+        MACOSX_DEPLOYMENT_TARGET: "14.4"
+        GENERATE_INFOPLIST_FILE: YES

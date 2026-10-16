@@ -39,6 +39,17 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "01220EBBCFE1695D1D4B0BAB"
+               BuildableName = "EmojiBakoTests.xctest"
+               BlueprintName = "EmojiBakoTests"
+               ReferencedContainer = "container:EmojiBako.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

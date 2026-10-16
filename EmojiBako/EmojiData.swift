@@ -35,10 +35,10 @@ class EmojiData: ObservableObject {
     private let userDefaultsKey = "emojiUsageCounts"
 
     let categories: [EmojiCategory]
-    /// 検索用：Favoritesカテゴリを除く全絵文字をフラットに保持
-    let allEmojis: [EmojiItem]
     /// char(絵文字文字列)→EmojiItem のルックアップ。Favorites復元や検索で使用
     let lookup: [String: EmojiItem]
+    /// 検索用の索引（Favoritesは除外）
+    let searchIndex: EmojiSearchIndex
 
     init() {
         // JSONファイルから絵文字データを読み込む。バンドルに同梱したデータが読めないのはビルドの誤りなので停止する
@@ -57,10 +57,10 @@ class EmojiData: ObservableObject {
         let favorites = EmojiCategory(id: "favorites", name: "Favorites", icon: "star.fill", emojis: [])
         self.categories = [favorites] + loadedCategories
 
-        // 検索用フラットリストとルックアップ辞書（Favoritesは除外）
+        // ルックアップ辞書と検索用の索引（Favoritesは除外）
         let flattened = loadedCategories.flatMap { $0.emojis }
-        self.allEmojis = flattened
         self.lookup = Dictionary(uniqueKeysWithValues: flattened.map { ($0.char, $0) })
+        self.searchIndex = EmojiSearchIndex(items: flattened)
 
         loadUsageCounts()
     }

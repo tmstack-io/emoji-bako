@@ -7,23 +7,42 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0C83F7EDF6CF6722498C7243 /* EmojiSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10861523A6F49931D0C396 /* EmojiSearch.swift */; };
+		36E8027A961D326B76317394 /* SearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61EF1705CD5202798282BDD9 /* SearchField.swift */; };
+		3CB54E56B2E59453FF1C5416 /* SearchFieldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E29E711E654D9F941E3BFE /* SearchFieldTests.swift */; };
 		7E3EEF8A209F2C7623DAFF32 /* EmojiData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 788AB52F4B460C230DBA12C8 /* EmojiData.swift */; };
 		A1BA9B8C89FA5A646975318D /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD62D596F994A1826B7172B1 /* EmojiPickerView.swift */; };
 		AAC103F561770622B8BACEED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 048FC01CA25F8B40465A0C07 /* Assets.xcassets */; };
+		BB159520AE58E978A256AF79 /* EmojiSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D93112423ABC244AAA0229 /* EmojiSearchTests.swift */; };
 		C014212CED240C8562ED11BB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */; };
 		EDAE66761BC7C53E2E27D4B6 /* EmojiBakoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F0647B9292700A3CEC3615 /* EmojiBakoApp.swift */; };
 		FA21B7F2F94C8C9CE597A36C /* emoji-data.json in Resources */ = {isa = PBXBuildFile; fileRef = 97B1BECC550EC0EE9CA42E1E /* emoji-data.json */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		347DD146DCF7706FD2F44DEE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 74CBB32A9A0439ABFB65D750 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A2624D376E40D8243E074824;
+			remoteInfo = EmojiBako;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		048FC01CA25F8B40465A0C07 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		61EF1705CD5202798282BDD9 /* SearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchField.swift; sourceTree = "<group>"; };
 		788AB52F4B460C230DBA12C8 /* EmojiData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiData.swift; sourceTree = "<group>"; };
 		78DC0583C24893DF16C03ECF /* EmojiBako.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmojiBako.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		84D93112423ABC244AAA0229 /* EmojiSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSearchTests.swift; sourceTree = "<group>"; };
 		97B1BECC550EC0EE9CA42E1E /* emoji-data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "emoji-data.json"; sourceTree = "<group>"; };
+		AB10861523A6F49931D0C396 /* EmojiSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSearch.swift; sourceTree = "<group>"; };
 		AD62D596F994A1826B7172B1 /* EmojiPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
 		C2F0647B9292700A3CEC3615 /* EmojiBakoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBakoApp.swift; sourceTree = "<group>"; };
+		C5E29E711E654D9F941E3BFE /* SearchFieldTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchFieldTests.swift; sourceTree = "<group>"; };
 		C964300B53D09596DECA7C30 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E14CFE618766D53A4E51601B /* EmojiBakoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EmojiBakoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -31,8 +50,18 @@
 			isa = PBXGroup;
 			children = (
 				6838AF854AB7CD533598C0FA /* EmojiBako */,
+				09F733D46109B1B6505FDD0F /* EmojiBakoTests */,
 				AEF809D206728A5F0E36112A /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		09F733D46109B1B6505FDD0F /* EmojiBakoTests */ = {
+			isa = PBXGroup;
+			children = (
+				84D93112423ABC244AAA0229 /* EmojiSearchTests.swift */,
+				C5E29E711E654D9F941E3BFE /* SearchFieldTests.swift */,
+			);
+			path = EmojiBakoTests;
 			sourceTree = "<group>";
 		};
 		6838AF854AB7CD533598C0FA /* EmojiBako */ = {
@@ -43,7 +72,9 @@
 				C2F0647B9292700A3CEC3615 /* EmojiBakoApp.swift */,
 				788AB52F4B460C230DBA12C8 /* EmojiData.swift */,
 				AD62D596F994A1826B7172B1 /* EmojiPickerView.swift */,
+				AB10861523A6F49931D0C396 /* EmojiSearch.swift */,
 				C964300B53D09596DECA7C30 /* Info.plist */,
+				61EF1705CD5202798282BDD9 /* SearchField.swift */,
 				40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */,
 			);
 			path = EmojiBako;
@@ -53,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				78DC0583C24893DF16C03ECF /* EmojiBako.app */,
+				E14CFE618766D53A4E51601B /* EmojiBakoTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,6 +92,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		01220EBBCFE1695D1D4B0BAB /* EmojiBakoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BC4E144E5B82318CDA226234 /* Build configuration list for PBXNativeTarget "EmojiBakoTests" */;
+			buildPhases = (
+				B76A5915FF7BA8136DB37D3B /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D1EE58A99B1170E6C34479D0 /* PBXTargetDependency */,
+			);
+			name = EmojiBakoTests;
+			packageProductDependencies = (
+			);
+			productName = EmojiBakoTests;
+			productReference = E14CFE618766D53A4E51601B /* EmojiBakoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		A2624D376E40D8243E074824 /* EmojiBako */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 69EEC9E188D1092D98043A8E /* Build configuration list for PBXNativeTarget "EmojiBako" */;
@@ -87,6 +137,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
+					01220EBBCFE1695D1D4B0BAB = {
+						DevelopmentTeam = PCUA32D2L3;
+						ProvisioningStyle = Automatic;
+					};
 					A2624D376E40D8243E074824 = {
 						DevelopmentTeam = PCUA32D2L3;
 						ProvisioningStyle = Automatic;
@@ -108,6 +162,7 @@
 			projectRoot = "";
 			targets = (
 				A2624D376E40D8243E074824 /* EmojiBako */,
+				01220EBBCFE1695D1D4B0BAB /* EmojiBakoTests */,
 			);
 		};
 /* End PBXProject section */
@@ -132,13 +187,54 @@
 				EDAE66761BC7C53E2E27D4B6 /* EmojiBakoApp.swift in Sources */,
 				7E3EEF8A209F2C7623DAFF32 /* EmojiData.swift in Sources */,
 				A1BA9B8C89FA5A646975318D /* EmojiPickerView.swift in Sources */,
+				0C83F7EDF6CF6722498C7243 /* EmojiSearch.swift in Sources */,
+				36E8027A961D326B76317394 /* SearchField.swift in Sources */,
 				C014212CED240C8562ED11BB /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B76A5915FF7BA8136DB37D3B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB159520AE58E978A256AF79 /* EmojiSearchTests.swift in Sources */,
+				3CB54E56B2E59453FF1C5416 /* SearchFieldTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		D1EE58A99B1170E6C34479D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A2624D376E40D8243E074824 /* EmojiBako */;
+			targetProxy = 347DD146DCF7706FD2F44DEE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		A2A6408E187B1977EB820507 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = PCUA32D2L3;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				PRODUCT_BUNDLE_IDENTIFIER = io.tmstack.EmojiBakoTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EmojiBako.app/Contents/MacOS/EmojiBako";
+			};
+			name = Release;
+		};
 		A9506A483CD3AD2B475BE920 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -215,6 +311,28 @@
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
+		};
+		CBF0BB4349DD5DC7C7611979 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = PCUA32D2L3;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				PRODUCT_BUNDLE_IDENTIFIER = io.tmstack.EmojiBakoTests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EmojiBako.app/Contents/MacOS/EmojiBako";
+			};
+			name = Debug;
 		};
 		CC77A8E0984161DAF0D3A32E /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -317,6 +435,15 @@
 			buildConfigurations = (
 				D8A973C023960C834EBF063A /* Debug */,
 				C970B2B9820F028747ED51FD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BC4E144E5B82318CDA226234 /* Build configuration list for PBXNativeTarget "EmojiBakoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CBF0BB4349DD5DC7C7611979 /* Debug */,
+				A2A6408E187B1977EB820507 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

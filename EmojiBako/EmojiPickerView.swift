@@ -10,7 +10,6 @@ struct EmojiPickerView: View {
     // 検索モード関連
     @State private var isSearching: Bool = false
     @State private var searchQuery: String = ""
-    @FocusState private var searchFieldFocused: Bool
 
     // キーボードイベントモニター（多重登録防止のため保持→onDisappearで解除）
     @State private var keyMonitor: Any?
@@ -134,15 +133,8 @@ struct EmojiPickerView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
                 .font(.system(size: 13))
-            TextField("絵文字を検索", text: $searchQuery)
-                .textFieldStyle(.plain)
-                .font(.system(size: 14))
-                .focused($searchFieldFocused)
-                .onSubmit {
-                    if !currentEmojis.isEmpty && selectedEmojiIndex < currentEmojis.count {
-                        selectEmoji(currentEmojis[selectedEmojiIndex])
-                    }
-                }
+            // Enterでの確定はキーボードハンドラが受け持つ
+            SearchField(text: $searchQuery, placeholder: "絵文字を検索")
             if !searchQuery.isEmpty {
                 Button(action: { searchQuery = "" }) {
                     Image(systemName: "xmark.circle.fill")
@@ -185,17 +177,8 @@ struct EmojiPickerView: View {
         selectedEmojiIndex = min(selectedEmojiIndex, max(0, currentEmojis.count - 1))
     }
 
-    /// 大文字小文字を無視し、空白区切りの全トークンを name に部分一致で AND 検索する
     private func filteredEmojis(query: String) -> [EmojiItem] {
-        let trimmed = query.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty else { return emojiData.allEmojis }
-        let tokens = trimmed.lowercased()
-            .split(whereSeparator: { $0.isWhitespace })
-            .map(String.init)
-        return emojiData.allEmojis.filter { item in
-            let target = item.englishName.lowercased()
-            return tokens.allSatisfy { target.contains($0) }
-        }
+        EmojiSearch.search(query, in: emojiData.searchIndex, usageCounts: emojiData.usageCounts)
     }
 
     // MARK: - 選択・貼り付け
@@ -243,16 +226,11 @@ struct EmojiPickerView: View {
     private func enterSearch() {
         isSearching = true
         selectedEmojiIndex = 0
-        // 次のRunLoopでフォーカスを当てる（TextField初期化を待つ）
-        DispatchQueue.main.async {
-            searchFieldFocused = true
-        }
     }
 
     private func exitSearch() {
         isSearching = false
         searchQuery = ""
-        searchFieldFocused = false
         selectedEmojiIndex = 0
     }
 
@@ -276,6 +254,11 @@ struct EmojiPickerView: View {
 
     private func handleKeyEvent(_ event: NSEvent) -> NSEvent? {
         let columnsCount = 8
+
+        // IMEで変換中のキー入力（候補の選択・確定・取り消し）はすべてIMEに渡す
+        if SearchField.isComposing(in: event.window) {
+            return event
+        }
 
         // Cmd+F は検索モードのトグル（通常モード/検索モードどちらでも消費）
         if event.modifierFlags.contains(.command) && event.keyCode == UInt16(kVK_ANSI_F) {
