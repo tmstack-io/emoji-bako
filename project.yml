@@ -1,0 +1,30 @@
+name: EmojiPicker
+options:
+  bundleIdPrefix: com.yourname
+  deploymentTarget:
+    macOS: "13.0"
+  xcodeVersion: "15.0"
+  generateEmptyDirectories: true
+  createIntermediateGroups: true
+
+targets:
+  EmojiPicker:
+    type: application
+    platform: macOS
+    sources:
+      - EmojiPicker
+    info:
+      path: EmojiPicker/Info.plist
+      properties:
+        LSUIElement: true
+        NSPrincipalClass: NSApplication
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.EmojiPicker
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: "5.0"
+        MACOSX_DEPLOYMENT_TARGET: "13.0"
+    scheme:
+      gatherCoverageData: false
