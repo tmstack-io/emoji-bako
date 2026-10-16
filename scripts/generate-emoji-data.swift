@@ -48,9 +48,25 @@ struct EmojiDataFile: Encodable {
 
 // MARK: - 取得
 
+/// HTTPステータスが200のときだけ本文を返す（Data(contentsOf:)は404でも本文を返すため使わない）
 func download(_ urlString: String) throws -> String {
     print("Downloading \(urlString)")
-    let data = try Data(contentsOf: URL(string: urlString)!)
+    var result: Result<(Data, URLResponse), Error>?
+    let done = DispatchSemaphore(value: 0)
+    URLSession.shared.dataTask(with: URL(string: urlString)!) { data, response, error in
+        if let error {
+            result = .failure(error)
+        } else {
+            result = .success((data!, response!))
+        }
+        done.signal()
+    }.resume()
+    done.wait()
+    let (data, response) = try result!.get()
+    let status = (response as! HTTPURLResponse).statusCode
+    guard status == 200 else {
+        throw GenerationError(description: "HTTP \(status): \(urlString)（バージョンの指定を確認してください）")
+    }
     guard let text = String(data: data, encoding: .utf8) else {
         throw GenerationError(description: "UTF-8として読めません: \(urlString)")
     }
@@ -310,6 +326,14 @@ do {
 
     print("Building emoji data...")
     let (categories, readings) = try buildCategories(emojiTest: emojiTest, annotations: annotations, overrides: overrides)
+    // アプリは起動時にcharをキーとする辞書を作るため、重複があると起動できない
+    let allChars = categories.flatMap { $0.emojis.map(\.char) }
+    guard categories.count == groupMapping.values.compactMap({ $0 }).count, categories.allSatisfy({ !$0.emojis.isEmpty }) else {
+        throw GenerationError(description: "空のカテゴリがあるか、カテゴリの数が想定と異なります")
+    }
+    guard Set(allChars).count == allChars.count else {
+        throw GenerationError(description: "同じ絵文字が複数回出力されます")
+    }
 
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]

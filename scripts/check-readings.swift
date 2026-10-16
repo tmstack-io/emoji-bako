@@ -84,7 +84,12 @@ func checkBatch(_ batch: [ReadingEntry], workDir: URL) throws -> [Correction] {
     ]
     // リポジトリのCLAUDE.mdなどを読ませないため、空の作業ディレクトリで実行する
     process.currentDirectoryURL = workDir
-    let stdin = Pipe(), stdout = Pipe(), stderr = Pipe()
+    let stdin = Pipe(), stdout = Pipe()
+    // 標準エラーもパイプにすると、標準出力を読み終えるまでにバッファが埋まって止まることがあるため、ファイルに書かせる
+    let stderrURL = workDir.appendingPathComponent("stderr-\(UUID().uuidString).log")
+    FileManager.default.createFile(atPath: stderrURL.path, contents: nil)
+    let stderr = try FileHandle(forWritingTo: stderrURL)
+    defer { try? stderr.close() }
     process.standardInput = stdin
     process.standardOutput = stdout
     process.standardError = stderr
@@ -92,8 +97,8 @@ func checkBatch(_ batch: [ReadingEntry], workDir: URL) throws -> [Correction] {
     stdin.fileHandleForWriting.write(try JSONEncoder().encode(batch))
     try stdin.fileHandleForWriting.close()
     let output = stdout.fileHandleForReading.readDataToEndOfFile()
-    let errorOutput = String(decoding: stderr.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
     process.waitUntilExit()
+    let errorOutput = String(decoding: try Data(contentsOf: stderrURL), as: UTF8.self)
     guard process.terminationStatus == 0 else {
         throw CheckError(description: "claudeが終了コード\(process.terminationStatus)で失敗しました: \(errorOutput)")
     }

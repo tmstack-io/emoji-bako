@@ -39,7 +39,9 @@ rm -rf "$OUT"
 mkdir -p "$OUT"
 cd "$ROOT"
 xcodegen generate
-[[ -z "$(git status --porcelain)" ]] || fail "xcodegenの生成結果がコミット済みのxcodeprojと異なります。project.ymlとxcodeprojを揃えてコミットしてください。"
+DIRTY="$(git status --porcelain)"
+[[ -z "$DIRTY" ]] || fail "xcodegenの生成結果がコミット済みのファイルと異なります。project.ymlを変えたら、xcodegen generateで生成したxcodeprojとEmojiBako/Info.plistも一緒にコミットしてください。差分のあるファイル:
+${DIRTY}"
 
 xcodebuild archive \
   -project EmojiBako.xcodeproj -scheme EmojiBako -configuration Release \

@@ -13,7 +13,7 @@ EmojiBakoは、ホットキーで呼び出して日本語で検索できる、ma
 - **どこからでも呼び出せる**: 初期設定では`⌘.`でピッカーが開きます。ホットキーは設定画面で変更できます。
 - **日本語で検索できる**: 「ねこ」「ネコ」「猫」「cat」のどれでも🐈が見つかります。IMEで変換中のひらがなでも絞り込めます。
 - **よく使う絵文字が先頭に並ぶ**: 使用回数の多い絵文字から表示します。
-- **クリップボードを元に戻す**: 絵文字の入力に一時的に使ったクリップボードは、画像やファイルも含めて元の内容に戻します。
+- **クリップボードを元に戻す**: 絵文字の入力に一時的に使ったクリップボードは、画像やファイルなどの形式も含めて元の内容に戻します（提供元のアプリが後からデータを渡す形式など、戻せないものもあります）。
 
 ### 動作環境
 
@@ -42,7 +42,7 @@ EmojiBakoは、ホットキーで呼び出して日本語で検索できる、ma
 ### 権限と通信
 
 - **アクセシビリティ**: 選んだ絵文字を作業中のアプリに入力するために、`⌘V`のキー操作を送ります。そのために必要です。
-- **クリップボード**: 絵文字の入力のために一時的に使い、0.4秒ほどで元の内容に戻します。一時的に置いた絵文字には、クリップボード管理アプリの履歴に残さないための印を付けます。
+- **クリップボード**: 絵文字の入力のために一時的に使い、初期設定では1秒後に元の内容に戻します。クリップボード管理アプリの履歴に残さないための印も付けます。貼り付け先のアプリが遅く、絵文字ではなく元の内容が貼り付けられる場合は、設定で戻すまでの時間を長くしてください。
 - **通信**: 外部と通信するのは、GitHubで新しいバージョンを確認するときだけです（1日1回）。設定でオフにできます。解析やクラッシュレポートの送信は行いません。
 
 ### 開発
@@ -70,7 +70,7 @@ EmojiBako is a menu bar emoji picker for macOS that opens with a hotkey and lets
 - **Open it from anywhere**: Press `⌘.` by default. You can change the hotkey in Settings.
 - **Search in Japanese or English**: 「ねこ」, 「ネコ」, 「猫」, and "cat" all find 🐈. Results update while you are still composing with a Japanese input method.
 - **Frequently used emoji first**: Emoji you use most appear first.
-- **Your clipboard is restored**: The clipboard is used briefly to type the emoji, then restored with everything it held, including images and files.
+- **Your clipboard is restored**: The clipboard is used briefly to type the emoji, then restored with its contents, including images and files (some formats that the source app provides on demand cannot be restored).
 
 ### Requirements
 
@@ -99,7 +99,7 @@ You can also click the menu bar icon to open the picker. Right-click it for Sett
 ### Permissions and network access
 
 - **Accessibility**: EmojiBako sends `⌘V` to type the emoji you pick into the app you are working in, which requires this permission.
-- **Clipboard**: Used briefly to type the emoji and restored after about 0.4 seconds. The temporary emoji is marked so that clipboard managers do not record it.
+- **Clipboard**: Used briefly to type the emoji and restored after 1 second by default, marked so that clipboard managers do not record it. If the previous content gets pasted instead of the emoji because the target app is slow, increase the delay in Settings.
 - **Network**: The only network access is a check for new versions on GitHub, once a day. You can turn it off in Settings. EmojiBako does not send analytics or crash reports.
 
 ### License
