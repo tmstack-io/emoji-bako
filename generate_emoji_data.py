@@ -130,7 +130,7 @@ def parse_emoji_test(content):
 def main():
     # スクリプトのディレクトリを取得
     script_dir = Path(__file__).parent
-    output_path = script_dir / "EmojiPicker" / "emoji-data.json"
+    output_path = script_dir / "EmojiBako" / "emoji-data.json"
     
     # emoji-test.txt をダウンロード
     content = download_emoji_test()

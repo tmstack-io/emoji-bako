@@ -60,7 +60,7 @@ struct EmojiPickerView: View {
                         .padding(8)
                     }
                 }
-                .onChange(of: selectedEmojiIndex) { newIndex in
+                .onChange(of: selectedEmojiIndex) { _, newIndex in
                     withAnimation {
                         proxy.scrollTo(newIndex, anchor: .center)
                     }
@@ -77,18 +77,18 @@ struct EmojiPickerView: View {
         .onDisappear {
             teardownKeyboardHandler()
         }
-        .onChange(of: emojiData.usageCounts) { _ in
+        .onChange(of: emojiData.usageCounts) {
             guard !isSearching, selectedCategoryIndex < emojiData.categories.count else { return }
             if emojiData.categories[selectedCategoryIndex].id == "favorites" {
                 updateCurrentEmojis()
             }
         }
-        .onChange(of: searchQuery) { _ in
+        .onChange(of: searchQuery) {
             if isSearching {
                 updateCurrentEmojis()
             }
         }
-        .onChange(of: isSearching) { _ in
+        .onChange(of: isSearching) {
             updateCurrentEmojis()
         }
     }
@@ -121,7 +121,7 @@ struct EmojiPickerView: View {
                 // 表示直後、現在選択中のカテゴリがウィンドウ外に隠れていないようにする
                 proxy.scrollTo(selectedCategoryIndex, anchor: .center)
             }
-            .onChange(of: selectedCategoryIndex) { newIndex in
+            .onChange(of: selectedCategoryIndex) { _, newIndex in
                 withAnimation {
                     proxy.scrollTo(newIndex, anchor: .center)
                 }

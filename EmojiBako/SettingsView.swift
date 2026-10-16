@@ -9,7 +9,7 @@ struct SettingsView: View {
             // 一般設定
             GroupBox(label: Text("一般").fontWeight(.semibold)) {
                 Toggle("ログイン時に起動", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { newValue in
+                    .onChange(of: launchAtLogin) { _, newValue in
                         setLaunchAtLogin(enabled: newValue)
                     }
                     .padding(.vertical, 4)
@@ -34,7 +34,7 @@ struct SettingsView: View {
                 HStack {
                     Text("バージョン")
                     Spacer()
-                    Text("1.0.0")
+                    Text(appVersion)
                         .foregroundColor(.secondary)
                 }
                 .padding(.vertical, 4)
@@ -61,6 +61,14 @@ struct SettingsView: View {
         }
     }
     
+    /// Info.plistのCFBundleShortVersionString。project.ymlで必ず設定されるため、欠けていればビルド設定の誤りとして停止する
+    private var appVersion: String {
+        guard let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String else {
+            fatalError("CFBundleShortVersionStringがInfo.plistにありません")
+        }
+        return version
+    }
+
     private func getLaunchAtLoginStatus() -> Bool {
         return SMAppService.mainApp.status == .enabled
     }

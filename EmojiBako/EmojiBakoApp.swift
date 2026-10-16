@@ -3,7 +3,7 @@ import Carbon.HIToolbox
 import ServiceManagement
 
 @main
-struct EmojiPickerApp: App {
+struct EmojiBakoApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {
@@ -35,7 +35,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "face.smiling", accessibilityDescription: "Emoji Picker")
+            button.image = NSImage(systemSymbolName: "face.smiling", accessibilityDescription: "EmojiBako")
             button.action = #selector(statusItemClicked(_:))
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
@@ -93,7 +93,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let hostingController = NSHostingController(rootView: settingsView)
             
             let window = NSWindow(contentViewController: hostingController)
-            window.title = "EmojiPicker 設定"
+            window.title = "EmojiBako 設定"
             window.styleMask = [.titled, .closable]
             window.setContentSize(NSSize(width: 350, height: 240))
             window.center()
@@ -194,7 +194,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         
         // 元のアプリにフォーカスを戻す
         if let app = previousApp {
-            app.activate(options: .activateIgnoringOtherApps)
+            app.activate()
         }
     }
     

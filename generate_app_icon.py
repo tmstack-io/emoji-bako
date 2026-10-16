@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-EmojiPicker用のアプリアイコンを生成
+EmojiBako用のアプリアイコンを生成
 """
 
 from PIL import Image, ImageDraw
@@ -64,7 +64,7 @@ def create_icon_with_emoji(size, output_path, base_emoji_path):
 
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_dir = os.path.join(script_dir, "EmojiPicker", "Assets.xcassets", "AppIcon.appiconset")
+    output_dir = os.path.join(script_dir, "EmojiBako", "Assets.xcassets", "AppIcon.appiconset")
     
     # 絵文字画像を作成（正方形キャンバスに描画）
     emoji_png = os.path.join(script_dir, "emoji_temp.png")
