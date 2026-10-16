@@ -3,6 +3,7 @@ import ServiceManagement
 
 struct SettingsView: View {
     @State private var launchAtLogin: Bool = false
+    @AppStorage(UpdateChecker.autoCheckDefaultsKey) private var autoCheckUpdates = true
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -12,6 +13,8 @@ struct SettingsView: View {
                     .onChange(of: launchAtLogin) { _, newValue in
                         setLaunchAtLogin(enabled: newValue)
                     }
+                    .padding(.vertical, 4)
+                Toggle("アップデートを自動で確認する", isOn: $autoCheckUpdates)
                     .padding(.vertical, 4)
             }
             

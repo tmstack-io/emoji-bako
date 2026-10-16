@@ -28,6 +28,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var hotKeySubscription: AnyCancellable?
     var previousApp: NSRunningApplication?
     let accessibilityOnboarding = AccessibilityOnboardingController()
+    let updateChecker = UpdateChecker()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Dockアイコンを非表示
@@ -50,6 +51,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if HotKeyStore.shared.registrationError != nil {
             openSettings()
         }
+
+        updateChecker.start()
 
         // 絵文字の入力にはアクセシビリティ権限が必要なため、未許可なら起動時に案内する
         if !AccessibilityPermission.isGranted {
