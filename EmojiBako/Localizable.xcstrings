@@ -1,0 +1,446 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "Activities": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activities"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アクティビティ"
+          }
+        }
+      }
+    },
+    "Animals & Nature": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animals & Nature"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "動物と自然"
+          }
+        }
+      }
+    },
+    "EmojiBako %@が公開されています": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EmojiBako %@ is available"
+          }
+        }
+      }
+    },
+    "EmojiBako 設定": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EmojiBako Settings"
+          }
+        }
+      }
+    },
+    "EmojiBakoは、選んだ絵文字を作業中のアプリに入力するために、⌘Vのキー操作を送ります。システム設定の「プライバシーとセキュリティ」→「アクセシビリティ」で、EmojiBakoを許可してください。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EmojiBako sends ⌘V to type the emoji you pick into the app you are working in. Allow EmojiBako in System Settings → Privacy & Security → Accessibility."
+          }
+        }
+      }
+    },
+    "Favorites": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Favorites"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "よく使う絵文字"
+          }
+        }
+      }
+    },
+    "Flags": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flags"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旗"
+          }
+        }
+      }
+    },
+    "Food & Drink": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Food & Drink"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "食べ物と飲み物"
+          }
+        }
+      }
+    },
+    "Objects": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Objects"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もの"
+          }
+        }
+      }
+    },
+    "People": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "People"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "人と体"
+          }
+        }
+      }
+    },
+    "Smileys": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smileys"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顔と感情"
+          }
+        }
+      }
+    },
+    "Symbols": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Symbols"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記号"
+          }
+        }
+      }
+    },
+    "Travel": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Travel"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "旅行と場所"
+          }
+        }
+      }
+    },
+    "macOSのショートカットで使われています": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This shortcut is used by macOS"
+          }
+        }
+      }
+    },
+    "⌘・⌥・⌃のいずれかを含めてください": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include ⌘, ⌥, or ⌃"
+          }
+        }
+      }
+    },
+    "あとで": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
+          }
+        }
+      }
+    },
+    "アクセシビリティの許可が必要です": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility permission is required"
+          }
+        }
+      }
+    },
+    "アップデートを自動で確認する": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatically check for updates"
+          }
+        }
+      }
+    },
+    "キーを押してください（Escで中止）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press a key (Esc to cancel)"
+          }
+        }
+      }
+    },
+    "キーボード": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keyboard"
+          }
+        }
+      }
+    },
+    "クリア": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        }
+      }
+    },
+    "システム設定を開く": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open System Settings"
+          }
+        }
+      }
+    },
+    "ショートカット": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut"
+          }
+        }
+      }
+    },
+    "ダウンロードページを開く": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Download Page"
+          }
+        }
+      }
+    },
+    "バージョン": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        }
+      }
+    },
+    "ホットキーを登録できませんでした（%lld）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not register the shortcut (%lld)"
+          }
+        }
+      }
+    },
+    "ログイン時に起動": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launch at login"
+          }
+        }
+      }
+    },
+    "一般": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        }
+      }
+    },
+    "情報": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
+          }
+        }
+      }
+    },
+    "検索を終了 (Esc)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close search (Esc)"
+          }
+        }
+      }
+    },
+    "現在のバージョンは%@です。ダウンロードページから新しいDMGを入手し、アプリを置き換えてください。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are using version %@. Download the new DMG from the download page and replace the app."
+          }
+        }
+      }
+    },
+    "終了": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quit"
+          }
+        }
+      }
+    },
+    "絵文字を検索": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search emoji"
+          }
+        }
+      }
+    },
+    "設定...": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings..."
+          }
+        }
+      }
+    },
+    "許可すると、この画面は自動で閉じます。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This window closes automatically once permission is granted."
+          }
+        }
+      }
+    },
+    "該当する絵文字がありません": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matching emoji"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

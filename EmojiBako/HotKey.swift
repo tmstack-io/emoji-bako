@@ -84,9 +84,9 @@ enum HotKeyValidationError: LocalizedError, Equatable {
 
     var errorDescription: String? {
         switch self {
-        case .missingModifier: return "⌘・⌥・⌃のいずれかを含めてください"
-        case .reservedBySystem: return "macOSのショートカットで使われています"
-        case .registrationFailed(let status): return "ホットキーを登録できませんでした（\(status)）"
+        case .missingModifier: return String(localized: "⌘・⌥・⌃のいずれかを含めてください")
+        case .reservedBySystem: return String(localized: "macOSのショートカットで使われています")
+        case .registrationFailed(let status): return String(localized: "ホットキーを登録できませんでした（\(Int(status))）")
         }
     }
 }

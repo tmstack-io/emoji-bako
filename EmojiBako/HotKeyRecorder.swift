@@ -13,8 +13,14 @@ struct HotKeyRecorder: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
             Button(action: { store.isRecording ? stopRecording() : startRecording() }) {
-                Text(store.isRecording ? "キーを押してください（Escで中止）" : store.hotKey.displayString)
-                    .frame(minWidth: 60)
+                Group {
+                    if store.isRecording {
+                        Text("キーを押してください（Escで中止）")
+                    } else {
+                        Text(verbatim: store.hotKey.displayString)
+                    }
+                }
+                .frame(minWidth: 60)
             }
             if let error = rejection ?? store.registrationError {
                 Text(error.localizedDescription)

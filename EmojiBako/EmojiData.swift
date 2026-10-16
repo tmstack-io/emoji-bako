@@ -12,6 +12,11 @@ struct EmojiItem: Codable, Hashable, Identifiable {
     let readings: [String]
 
     var id: String { char }
+
+    /// アプリの表示言語に合わせた名前（日本語で表示しているときは日本語名、それ以外は英語名）
+    var localizedName: String {
+        Bundle.main.preferredLocalizations.first == "ja" ? japaneseName : englishName
+    }
 }
 
 struct EmojiCategory: Identifiable, Hashable, Codable {

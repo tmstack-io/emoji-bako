@@ -6,6 +6,7 @@ options:
   xcodeVersion: "15.0"
   generateEmptyDirectories: true
   createIntermediateGroups: true
+  developmentLanguage: en
 
 targets:
   EmojiBako:
@@ -29,6 +30,8 @@ targets:
         ARCHS: arm64
         SWIFT_VERSION: "5.0"
         MACOSX_DEPLOYMENT_TARGET: "14.4"
+        SWIFT_EMIT_LOC_STRINGS: YES
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     scheme:
       gatherCoverageData: false
       testTargets:

@@ -136,7 +136,7 @@ struct EmojiPickerView: View {
                 .foregroundColor(.secondary)
                 .font(.system(size: 13))
             // Enterでの確定はキーボードハンドラが受け持つ
-            SearchField(text: $searchQuery, placeholder: "絵文字を検索")
+            SearchField(text: $searchQuery, placeholder: String(localized: "絵文字を検索"))
             if !searchQuery.isEmpty {
                 Button(action: { searchQuery = "" }) {
                     Image(systemName: "xmark.circle.fill")
@@ -349,7 +349,8 @@ struct CategoryTab: View {
                 .cornerRadius(6)
         }
         .buttonStyle(.plain)
-        .help(category.name)
+        // カテゴリ名は絵文字データのIDに対応する英語の表示名で、String Catalogで翻訳する
+        .help(LocalizedStringKey(category.name))
     }
 }
 
@@ -371,7 +372,7 @@ struct EmojiButton: View {
                 )
         }
         .buttonStyle(.plain)
-        .help(item.englishName)
+        .help(item.localizedName)
     }
 }
 

@@ -22,6 +22,7 @@
 		BB159520AE58E978A256AF79 /* EmojiSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D93112423ABC244AAA0229 /* EmojiSearchTests.swift */; };
 		C014212CED240C8562ED11BB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */; };
 		D4BB0C086D9DEC38835823B1 /* PasteboardSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9984CA19ED51419159ABA998 /* PasteboardSnapshotTests.swift */; };
+		E3449D1448D20DCB2FBB6948 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 2BEA41BB1778925E471FBAA4 /* Localizable.xcstrings */; };
 		EDAE66761BC7C53E2E27D4B6 /* EmojiBakoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F0647B9292700A3CEC3615 /* EmojiBakoApp.swift */; };
 		FA21B7F2F94C8C9CE597A36C /* emoji-data.json in Resources */ = {isa = PBXBuildFile; fileRef = 97B1BECC550EC0EE9CA42E1E /* emoji-data.json */; };
 		FDDCD1ECA9524568323A8269 /* PasteboardSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4083C9353D51C32DE9ECC3 /* PasteboardSnapshot.swift */; };
@@ -41,6 +42,7 @@
 		048FC01CA25F8B40465A0C07 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1914AF68886C66A348FEF60E /* HotKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKey.swift; sourceTree = "<group>"; };
 		1F4083C9353D51C32DE9ECC3 /* PasteboardSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardSnapshot.swift; sourceTree = "<group>"; };
+		2BEA41BB1778925E471FBAA4 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		5DDEF9B0DED93577CA4686B0 /* HotKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyTests.swift; sourceTree = "<group>"; };
 		61EF1705CD5202798282BDD9 /* SearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchField.swift; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 				1914AF68886C66A348FEF60E /* HotKey.swift */,
 				AAF8AD7DF67488225D32AA9F /* HotKeyRecorder.swift */,
 				C964300B53D09596DECA7C30 /* Info.plist */,
+				2BEA41BB1778925E471FBAA4 /* Localizable.xcstrings */,
 				1F4083C9353D51C32DE9ECC3 /* PasteboardSnapshot.swift */,
 				61EF1705CD5202798282BDD9 /* SearchField.swift */,
 				40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */,
@@ -197,6 +200,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AAC103F561770622B8BACEED /* Assets.xcassets in Resources */,
+				E3449D1448D20DCB2FBB6948 /* Localizable.xcstrings in Resources */,
 				FA21B7F2F94C8C9CE597A36C /* emoji-data.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -281,9 +285,11 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				PRODUCT_BUNDLE_IDENTIFIER = io.tmstack.EmojiBako;
 				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -380,9 +386,11 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				PRODUCT_BUNDLE_IDENTIFIER = io.tmstack.EmojiBako;
 				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

@@ -97,10 +97,10 @@ final class UpdateChecker {
     @MainActor
     private func notify(latest: AppVersion, current: AppVersion, page: URL) {
         let alert = NSAlert()
-        alert.messageText = "EmojiBako \(latest)が公開されています"
-        alert.informativeText = "現在のバージョンは\(current)です。ダウンロードページから新しいDMGを入手し、アプリを置き換えてください。"
-        alert.addButton(withTitle: "ダウンロードページを開く")
-        alert.addButton(withTitle: "あとで")
+        alert.messageText = String(localized: "EmojiBako \(latest.description)が公開されています")
+        alert.informativeText = String(localized: "現在のバージョンは\(current.description)です。ダウンロードページから新しいDMGを入手し、アプリを置き換えてください。")
+        alert.addButton(withTitle: String(localized: "ダウンロードページを開く"))
+        alert.addButton(withTitle: String(localized: "あとで"))
         NSApp.activate()
         if alert.runModal() == .alertFirstButtonReturn {
             NSWorkspace.shared.open(page)
