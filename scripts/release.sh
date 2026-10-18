@@ -12,7 +12,13 @@
 #      プロファイル名を変える場合は、環境変数NOTARY_PROFILEで指定する。
 #
 # 公証はアプリとDMGの両方に行い、両方にチケットをステープルする（オフラインでも初回起動の検証が通るように）。
+#
+# 注意: 公証の待ち時間は数分から数十分かかる。画面がロックされるとnotarytoolがキーチェーンの認証情報を読めず、
+# 「No Keychain password item found」で失敗するため、実行中は画面のスリープを止める。手動でロックした場合は防げない。
 set -euo pipefail
+
+# このスクリプトが終わるまで、画面のスリープ（とそれに伴う自動ロック）を止める
+caffeinate -d -i -w $$ &!
 
 TEAM_ID="PCUA32D2L3"
 NOTARY_PROFILE="${NOTARY_PROFILE:-notary-${TEAM_ID}}"
