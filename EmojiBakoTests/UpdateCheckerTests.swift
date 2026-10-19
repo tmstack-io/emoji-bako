@@ -30,10 +30,10 @@ final class UpdateCheckerTests: XCTestCase {
     }
 
     func testDecodesGitHubReleaseResponse() throws {
-        let json = #"{"tag_name": "v1.2.0", "html_url": "https://github.com/tmstack-io/EmojiBako/releases/tag/v1.2.0", "name": "1.2.0", "draft": false}"#
+        let json = #"{"tag_name": "v1.2.0", "html_url": "https://github.com/tmstack-io/emoji-bako/releases/tag/v1.2.0", "name": "1.2.0", "draft": false}"#
         let release = try JSONDecoder().decode(GitHubRelease.self, from: Data(json.utf8))
         XCTAssertEqual(release.tag_name, "v1.2.0")
-        XCTAssertEqual(release.html_url.absoluteString, "https://github.com/tmstack-io/EmojiBako/releases/tag/v1.2.0")
+        XCTAssertEqual(release.html_url.absoluteString, "https://github.com/tmstack-io/emoji-bako/releases/tag/v1.2.0")
     }
 
     func testAutoCheckDefaultsToOn() throws {

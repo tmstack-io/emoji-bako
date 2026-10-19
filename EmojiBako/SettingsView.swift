@@ -66,7 +66,7 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
                 .padding(.vertical, 4)
-                Link("ウェブサイト", destination: URL(string: "https://tmstack-io.github.io/EmojiBako/")!)
+                Link("ウェブサイト", destination: URL(string: "https://tmstack-io.github.io/emoji-bako/")!)
                     .padding(.vertical, 2)
                 VStack(alignment: .leading, spacing: 4) {
                     Text("EmojiBakoはMITライセンスで公開しています。絵文字の名前とキーワードには、Unicode, Inc.のデータ（Unicode License v3）を使用しています。")

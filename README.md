@@ -22,7 +22,7 @@ EmojiBakoは、ホットキーで呼び出して日本語で検索できる、ma
 
 ### インストール
 
-1. [Releases](https://github.com/tmstack-io/EmojiBako/releases/latest)から最新のDMGをダウンロードします。
+1. [Releases](https://github.com/tmstack-io/emoji-bako/releases/latest)から最新のDMGをダウンロードします。
 2. DMGを開き、EmojiBakoを「アプリケーション」フォルダにドラッグします。
 3. EmojiBakoを起動し、案内に従ってアクセシビリティを許可します。
 
@@ -79,7 +79,7 @@ EmojiBako is a menu bar emoji picker for macOS that opens with a hotkey and lets
 
 ### Installation
 
-1. Download the latest DMG from [Releases](https://github.com/tmstack-io/EmojiBako/releases/latest).
+1. Download the latest DMG from [Releases](https://github.com/tmstack-io/emoji-bako/releases/latest).
 2. Open the DMG and drag EmojiBako to the Applications folder.
 3. Launch EmojiBako and allow Accessibility access when prompted.
 

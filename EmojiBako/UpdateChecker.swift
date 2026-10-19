@@ -36,7 +36,7 @@ enum UpdateCheckError: Error {
 final class UpdateChecker {
     static let autoCheckDefaultsKey = "autoCheckUpdates"
     private static let lastNotifiedVersionKey = "lastNotifiedUpdateVersion"
-    private static let latestReleaseURL = URL(string: "https://api.github.com/repos/tmstack-io/EmojiBako/releases/latest")!
+    private static let latestReleaseURL = URL(string: "https://api.github.com/repos/tmstack-io/emoji-bako/releases/latest")!
     private static let interval: TimeInterval = 24 * 60 * 60
 
     private let logger = Logger(subsystem: "io.tmstack.EmojiBako", category: "UpdateChecker")
