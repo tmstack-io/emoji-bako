@@ -1,6 +1,7 @@
 import XCTest
 @testable import EmojiBako
 
+@MainActor
 final class ICloudUsageStoreTests: XCTestCase {
     func testMapsKeyValueStoreChangeReasons() {
         func reason(_ value: Int) -> UsageSync.CloudChangeReason? {
@@ -20,5 +21,10 @@ final class ICloudUsageStoreTests: XCTestCase {
 
     func testComputerNameIsAvailable() {
         XCTAssertFalse(ComputerNameMonitor.current().isEmpty)
+    }
+
+    func testHardwareIDIsStable() {
+        XCTAssertFalse(MacHardware.platformUUID().isEmpty)
+        XCTAssertEqual(MacHardware.platformUUID(), MacHardware.platformUUID())
     }
 }

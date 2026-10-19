@@ -1,6 +1,7 @@
 import XCTest
 @testable import EmojiBako
 
+@MainActor
 final class EmojiSearchTests: XCTestCase {
 
     private func item(_ char: String, en: String = "", ja: String = "", keywords: [String] = [], readings: [String] = []) -> EmojiItem {

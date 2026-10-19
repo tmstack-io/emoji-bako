@@ -34,6 +34,7 @@ struct EmojiDataFile: Codable {
     let categories: [EmojiCategory]
 }
 
+@MainActor
 class EmojiData: ObservableObject {
     static let shared = EmojiData()
 
@@ -78,10 +79,10 @@ class EmojiData: ObservableObject {
         self.lookup = Dictionary(uniqueKeysWithValues: flattened.map { ($0.char, $0) })
         self.searchIndex = EmojiSearchIndex(items: flattened)
 
-        let usageSync = UsageSync(local: .standard, cloud: ICloudKeyValueStore(), computerName: ComputerNameMonitor.current)
+        let usageSync = UsageSync(local: .standard, cloud: ICloudKeyValueStore(), computerName: ComputerNameMonitor.current(), hardwareID: MacHardware.platformUUID())
         self.usageSync = usageSync
         self.cloudConnection = ICloudUsageSyncConnection(sync: usageSync)
-        self.computerNameMonitor = ComputerNameMonitor { usageSync.computerNameDidChange() }
+        self.computerNameMonitor = ComputerNameMonitor { usageSync.computerNameDidChange(to: $0) }
 
         totalsSubscription = usageSync.$totals.sink { [weak self] totals in
             self?.usageCounts = totals

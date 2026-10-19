@@ -15,9 +15,13 @@ struct UsageSyncSettingsView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Toggle("iCloudで使用回数を同期する", isOn: Binding(
                     get: { sync.isEnabled },
-                    set: { $0 ? sync.enable() : sync.disable() }
+                    set: { enabled in
+                        // 表示が古いまま押された場合に二重に切り替えない
+                        guard enabled != sync.isEnabled else { return }
+                        enabled ? sync.enable() : sync.disable()
+                    }
                 ))
-                Text("オンにすると、使用回数とこのMacのコンピュータ名をあなたのiCloudに保存し、同じApple IDのMac同士でよく使う絵文字をそろえます。")
+                Text("オンにすると、使用回数とこのMacのコンピュータ名をあなたのiCloudに保存し、同じAppleアカウントのMac同士でよく使う絵文字をそろえます。")
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -38,8 +42,15 @@ struct UsageSyncSettingsView: View {
             .controlSize(.small)
         }
         .padding(.vertical, 4)
+        // 確認画面を開いているあいだに、ほかのMacでこのMacが同期から外された場合などは、同期中の操作を取りやめる
+        .onChange(of: sync.isEnabled) {
+            confirmingResetAllMacs = false
+            macToRemove = nil
+        }
         .alert("すべてのMacの使用回数をリセットしますか？", isPresented: $confirmingResetAllMacs) {
-            Button("リセット", role: .destructive) { sync.resetAllMacs() }
+            Button("リセット", role: .destructive) {
+                if sync.isEnabled { sync.resetAllMacs() }
+            }
             Button("キャンセル", role: .cancel) {}
         } message: {
             Text("同期しているすべてのMacの使用回数を消します。オフラインのMacでまだ届いていない使用回数も消えます。この操作は取り消せません。")
@@ -49,7 +60,7 @@ struct UsageSyncSettingsView: View {
             Button("キャンセル", role: .cancel) {}
         } message: {
             if sync.isEnabled {
-                Text("このMacで数えた使用回数だけを消します。ほかのMacの使用回数は残るため、よく使う絵文字が大きくは変わらないことがあります。")
+                Text("このMacで数えた使用回数だけを消します。ほかのMacの使用回数は残るため、よく使う絵文字が大きくは変わらないことがあります。この操作は取り消せません。")
             } else {
                 Text("このMacの使用回数を消します。この操作は取り消せません。")
             }
@@ -59,7 +70,7 @@ struct UsageSyncSettingsView: View {
             isPresented: Binding(get: { macToRemove != nil }, set: { if !$0 { macToRemove = nil } })
         ) {
             Button("同期から外す", role: .destructive) {
-                if let macToRemove { sync.removeMac(id: macToRemove.id) }
+                if let macToRemove, sync.isEnabled { sync.removeMac(id: macToRemove.id) }
             }
             Button("キャンセル", role: .cancel) {}
         } message: {
@@ -89,8 +100,14 @@ struct UsageSyncSettingsView: View {
                 .font(.caption)
                 .foregroundColor(.red)
         }
-        if sync.isEnabled, let error = sync.lastError {
-            Text(Self.message(for: error))
+        if sync.isEnabled && sync.isQuotaExceeded {
+            Text("EmojiBakoがiCloudに保存できる容量の上限を超えたため、同期できません。")
+                .font(.caption)
+                .foregroundColor(.red)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        if sync.isEnabled && !sync.malformedKeys.isEmpty {
+            Text("iCloud上のデータの一部（\(sync.malformedKeys.sorted().joined(separator: ", "))）を読み取れませんでした。そのデータは合計に入れていません。")
                 .font(.caption)
                 .foregroundColor(.red)
                 .fixedSize(horizontal: false, vertical: true)
@@ -113,9 +130,11 @@ struct UsageSyncSettingsView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
-                        Text("最後に記録: \(mac.updatedAt.formatted(date: .abbreviated, time: .shortened))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        if let updatedAt = mac.updatedAt {
+                            Text("最終更新: \(updatedAt.formatted(date: .abbreviated, time: .shortened))")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     Spacer()
                     if !mac.isThisMac {
@@ -127,14 +146,5 @@ struct UsageSyncSettingsView: View {
         }
         .padding(8)
         .background(RoundedRectangle(cornerRadius: 6).fill(Color(NSColor.controlBackgroundColor)))
-    }
-
-    private static func message(for error: UsageSync.SyncError) -> String {
-        switch error {
-        case .quotaExceeded:
-            return String(localized: "iCloudの保存容量の上限を超えたため、同期できません。")
-        case .malformedValue(let key):
-            return String(localized: "iCloud上のデータの一部（\(key)）を読み取れませんでした。そのデータは合計に入れていません。")
-        }
     }
 }

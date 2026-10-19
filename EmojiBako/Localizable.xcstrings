@@ -67,6 +67,16 @@
         }
       }
     },
+    "EmojiBakoがiCloudに保存できる容量の上限を超えたため、同期できません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cannot sync because EmojiBako has exceeded its iCloud storage limit."
+          }
+        }
+      }
+    },
     "EmojiBakoはMITライセンスで公開しています。絵文字の名前とキーワードには、Unicode, Inc.のデータ（Unicode License v3）を使用しています。": {
       "localizations": {
         "en": {
@@ -271,16 +281,6 @@
         }
       }
     },
-    "iCloudの保存容量の上限を超えたため、同期できません。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cannot sync because the iCloud storage limit for EmojiBako has been exceeded."
-          }
-        }
-      }
-    },
     "iCloudを使えないため、このMacにだけ記録しています。": {
       "localizations": {
         "en": {
@@ -351,12 +351,12 @@
         }
       }
     },
-    "このMacで数えた使用回数だけを消します。ほかのMacの使用回数は残るため、よく使う絵文字が大きくは変わらないことがあります。": {
+    "このMacで数えた使用回数だけを消します。ほかのMacの使用回数は残るため、よく使う絵文字が大きくは変わらないことがあります。この操作は取り消せません。": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Only the usage counts recorded on this Mac will be cleared. Counts from other Macs remain, so Frequently Used may not change much."
+            "value": "Only the usage counts recorded on this Mac will be cleared. Counts from other Macs remain, so Frequently Used may not change much. This cannot be undone."
           }
         }
       }
@@ -471,7 +471,7 @@
         }
       }
     },
-    "オンにすると、使用回数とこのMacのコンピュータ名をあなたのiCloudに保存し、同じApple IDのMac同士でよく使う絵文字をそろえます。": {
+    "オンにすると、使用回数とこのMacのコンピュータ名をあなたのiCloudに保存し、同じAppleアカウントのMac同士でよく使う絵文字をそろえます。": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -701,12 +701,12 @@
         }
       }
     },
-    "最後に記録: %@": {
+    "最終更新: %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Last recorded: %@"
+            "value": "Last updated: %@"
           }
         }
       }

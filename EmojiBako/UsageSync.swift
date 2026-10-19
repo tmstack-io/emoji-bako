@@ -15,15 +15,17 @@ protocol UsageCloudStore: AnyObject {
 /// 使用回数を記録し、同期がオンなら同期中のMacの使用回数と合わせる。
 ///
 /// iCloud上のデータ:
-/// - `generation`: リセットの世代番号。複数のMacが書くため、手元の値と比べて大きい方を採る
+/// - `generation`: リセットの世代（number: 世代番号、resetAt: リセットした日時）。複数のMacが書くため、番号の大きい方を採る
 /// - `mac.<ID>`: そのMacだけが書く欄（generation、name、updatedAt、counts）
 /// - `removed.<ID>`: 同期から外したMacの記録。消さない
+@MainActor
 final class UsageSync: ObservableObject {
     /// 同期中のMacの一覧の1行
     struct Mac: Equatable, Identifiable {
         let id: String
         let name: String
-        let updatedAt: Date
+        /// そのMacが最後に欄を書いた日時（このMacの欄がまだiCloudにないときはnil）
+        let updatedAt: Date?
         let isThisMac: Bool
     }
 
@@ -35,15 +37,17 @@ final class UsageSync: ObservableObject {
         case initialSync
         /// 容量の上限を超えた
         case quotaViolation
-        /// MacのApple IDが変わった
+        /// MacのAppleアカウントが変わった
         case accountChange
     }
 
-    enum SyncError: Error, Equatable {
-        /// iCloud上の値の形式が想定と異なる（キー）
-        case malformedValue(key: String)
-        /// iCloud KVSの容量の上限を超えた
-        case quotaExceeded
+    /// リセットの世代
+    struct Generation: Equatable {
+        let number: Int
+        /// リセットした日時（最初の世代はdistantPast）
+        let resetAt: Date
+
+        static let first = Generation(number: 1, resetAt: .distantPast)
     }
 
     // iCloud上のキー
@@ -55,7 +59,11 @@ final class UsageSync: ObservableObject {
     static let countsDefaultsKey = "usage.thisMacCounts"
     static let enabledDefaultsKey = "usage.syncEnabled"
     static let macIDDefaultsKey = "usage.macID"
-    static let generationDefaultsKey = "usage.generation"
+    static let hardwareIDDefaultsKey = "usage.hardwareID"
+    static let joinedAtDefaultsKey = "usage.joinedAt"
+    static let generationNumberDefaultsKey = "usage.generationNumber"
+    static let generationResetAtDefaultsKey = "usage.generationResetAt"
+    static let iCloudIdentityDefaultsKey = "usage.iCloudIdentity"
     static let removedByOtherMacDefaultsKey = "usage.removedByOtherMac"
 
     /// 表示に使う使用回数（同期がオンなら同期中のMacの合計、オフならこのMacの分）
@@ -65,7 +73,10 @@ final class UsageSync: ObservableObject {
     @Published private(set) var isEnabled: Bool
     /// ほかのMacで、このMacが同期から外された
     @Published private(set) var wasRemovedByOtherMac: Bool
-    @Published private(set) var lastError: SyncError?
+    /// 形式が想定と異なるため読めなかった、iCloud上のキー
+    @Published private(set) var malformedKeys: Set<String> = []
+    /// iCloud KVSの容量の上限を超えた（使用回数を減らす操作をするまで表示する）
+    @Published private(set) var isQuotaExceeded = false
     /// iCloudにサインインしている（していなければ、使用回数はこのMacの中にだけ記録される）
     @Published private(set) var isICloudSignedIn = true
     /// iCloud KVSを使える（entitlementがないなどで使えなければfalse）
@@ -76,11 +87,15 @@ final class UsageSync: ObservableObject {
 
     private let local: UserDefaults
     private let cloud: UsageCloudStore
-    private let computerName: () -> String
+    private var computerName: String
     private let now: () -> Date
+    /// 一度ログに記録した、形式の不正なキー（同じキーで何度も記録しないため）
+    private var loggedMalformedKeys: Set<String> = []
     private let logger = Logger(subsystem: "io.tmstack.EmojiBako", category: "UsageSync")
 
-    init(local: UserDefaults, cloud: UsageCloudStore, computerName: @escaping () -> String, now: @escaping () -> Date = Date.init) {
+    /// 手元の保存データを読み込む。iCloudとの突き合わせは start で行う
+    /// - Parameter hardwareID: このMacのハードウェアの識別子。移行アシスタントなどで別のMacから写ってきた保存データを見分けるのに使う
+    init(local: UserDefaults, cloud: UsageCloudStore, computerName: String, hardwareID: String, now: @escaping () -> Date = Date.init) {
         self.local = local
         self.cloud = cloud
         self.computerName = computerName
@@ -92,11 +107,7 @@ final class UsageSync: ObservableObject {
         thisMacCounts = local.object(forKey: Self.countsDefaultsKey) as? [String: Int] ?? [:]
         isEnabled = local.bool(forKey: Self.enabledDefaultsKey)
         wasRemovedByOtherMac = local.bool(forKey: Self.removedByOtherMacDefaultsKey)
-        if isEnabled {
-            applyCloudState(adoptCloudGeneration: false)
-        } else {
-            recompute()
-        }
+        handleCopiedFromAnotherMac(hardwareID: hardwareID)
     }
 
     // MARK: - v1.0.0からの移行
@@ -120,6 +131,38 @@ final class UsageSync: ObservableObject {
         local.removeObject(forKey: v1Key)
     }
 
+    // MARK: - 別のMacから写ってきた保存データ
+
+    /// 保存データが別のMacから写ってきたもの（移行アシスタントなど）なら、このMacを新しいMacとして扱う。
+    /// 写す前のMacで同期がオンだった場合、その使用回数は写す前のMacの欄としてiCloudにあるので、二重に数えないよう捨てる
+    private func handleCopiedFromAnotherMac(hardwareID: String) {
+        let storedHardwareID = local.string(forKey: Self.hardwareIDDefaultsKey)
+        local.set(hardwareID, forKey: Self.hardwareIDDefaultsKey)
+        guard let storedHardwareID, storedHardwareID != hardwareID, isEnabled else { return }
+        logger.notice("別のMacから写ってきた保存データのため、新しいMacとして同期に加わります")
+        thisMacCounts = [:]
+        saveThisMacCounts()
+        joinSync()
+    }
+
+    // MARK: - 起動
+
+    /// 起動時に、iCloudとの突き合わせを始める
+    /// - Parameter iCloudIdentity: 今のAppleアカウントを表すデータ（サインインしていなければnil）
+    func start(iCloudIdentity: Data?) {
+        let storedIdentity = local.data(forKey: Self.iCloudIdentityDefaultsKey)
+        local.set(iCloudIdentity, forKey: Self.iCloudIdentityDefaultsKey)
+        guard isEnabled else {
+            recompute()
+            return
+        }
+        if storedIdentity != nil, iCloudIdentity != nil, storedIdentity != iCloudIdentity {
+            // アプリを終了しているあいだにAppleアカウントが変わった
+            joinCurrentGeneration()
+        }
+        applyCloudState()
+    }
+
     // MARK: - 操作
 
     /// 絵文字を1回使ったことを記録する
@@ -133,37 +176,39 @@ final class UsageSync: ObservableObject {
     /// 同期をオンにする。このMacの使用回数は消さず、iCloudの現在の世代に加える
     func enable() {
         precondition(!isEnabled, "同期はすでにオンです")
-        local.set(UUID().uuidString, forKey: Self.macIDDefaultsKey)
-        setEnabled(true)
         setRemovedByOtherMac(false)
-        applyCloudState(adoptCloudGeneration: true)
+        joinSync()
+        applyCloudState()
     }
 
     /// 同期をオフにする。iCloud上のこのMacの欄を消し、このMacの使用回数だけで表示する
     func disable() {
         precondition(isEnabled, "同期はすでにオフです")
-        if let macID { cloud.removeObject(forKey: Self.macKey(macID)) }
+        cloud.removeObject(forKey: Self.macKey(requireMacID()))
+        isQuotaExceeded = false
         leaveSync()
     }
 
     /// すべてのMacの使用回数を消す（同期がオンのときだけ）
     func resetAllMacs() {
         precondition(isEnabled, "すべてのMacのリセットは同期がオンのときだけ行える")
-        let cloudGeneration = readCloudGeneration() ?? 1
-        let next = max(localGeneration, cloudGeneration) + 1
-        local.set(next, forKey: Self.generationDefaultsKey)
-        cloud.set(next, forKey: Self.generationKey)
+        let cloudNumber = readCloudGeneration()?.number ?? Generation.first.number
+        let next = Generation(number: max(localGeneration.number, cloudNumber) + 1, resetAt: now())
+        saveLocalGeneration(next)
+        cloud.set(Self.encode(next), forKey: Self.generationKey)
         thisMacCounts = [:]
         saveThisMacCounts()
+        isQuotaExceeded = false
         writeThisMacSlotIfNeeded()
         removeStaleSlots()
         recompute()
     }
 
-    /// このMacの使用回数だけを消す。世代番号は変えない
+    /// このMacの使用回数だけを消す。世代は変えない
     func resetThisMac() {
         thisMacCounts = [:]
         saveThisMacCounts()
+        isQuotaExceeded = false
         if isEnabled { writeThisMacSlotIfNeeded() }
         recompute()
     }
@@ -184,30 +229,34 @@ final class UsageSync: ObservableObject {
 
     /// iCloud KVSの変更通知を受け取ったときに呼ぶ
     func cloudDidChange(reason: CloudChangeReason) {
+        guard isEnabled else { return }
         switch reason {
         case .quotaViolation:
             logger.error("iCloud KVSの容量の上限を超えました")
-            lastError = .quotaExceeded
-        case .serverChange:
-            if isEnabled { applyCloudState(adoptCloudGeneration: false) }
-        case .initialSync, .accountChange:
-            // 初めて読み込んだ世代や、別のApple IDの世代は、リセットではないので使用回数を消さずに採る
-            if isEnabled { applyCloudState(adoptCloudGeneration: true) }
+            isQuotaExceeded = true
+        case .serverChange, .initialSync:
+            applyCloudState()
+        case .accountChange:
+            // 新しいアカウントの世代は、このMacにとってのリセットではない
+            joinCurrentGeneration()
+            applyCloudState()
         }
     }
 
     /// iCloudのサインイン状態が分かったとき・変わったときに呼ぶ
-    func iCloudSignInDidChange(signedIn: Bool) {
+    func iCloudSignInDidChange(signedIn: Bool, identity: Data?) {
         isICloudSignedIn = signedIn
+        local.set(identity, forKey: Self.iCloudIdentityDefaultsKey)
     }
 
-    /// iCloud KVSを使えないと分かったときに呼ぶ
-    func cloudStoreDidBecomeUnavailable() {
-        isCloudStoreAvailable = false
+    /// iCloud KVSを使えるかどうか（synchronize()の結果）が分かったときに呼ぶ
+    func cloudStoreAvailabilityDidChange(available: Bool) {
+        isCloudStoreAvailable = available
     }
 
     /// コンピュータ名が変わったときに呼ぶ
-    func computerNameDidChange() {
+    func computerNameDidChange(to name: String) {
+        computerName = name
         guard isEnabled else { return }
         writeThisMacSlotIfNeeded()
         recompute()
@@ -215,11 +264,24 @@ final class UsageSync: ObservableObject {
 
     // MARK: - iCloudとの突き合わせ
 
-    /// iCloudの状態を読み、世代番号・このMacの欄・古い欄を整える。
-    /// adoptCloudGeneration が true なら、iCloudの世代が新しくても使用回数を消さずにその世代を採る
-    private func applyCloudState(adoptCloudGeneration: Bool) {
-        guard let macID else { preconditionFailure("同期がオンなのにこのMacのIDがありません") }
-        lastError = nil
+    /// 新しいIDで同期に加わる（同期をオンにしたとき、別のMacから写ってきたとき）
+    private func joinSync() {
+        local.set(UUID().uuidString, forKey: Self.macIDDefaultsKey)
+        setEnabled(true)
+        joinCurrentGeneration()
+    }
+
+    /// iCloudの今の世代に、使用回数を消さずに合わせる。
+    /// 手元に残っている古い世代を書き戻すと、ほかのMacの使用回数を消してしまうため、手元の方をiCloudに合わせる。
+    /// iCloudのデータがまだ届いていない場合に備え、加わった日時を記録する（これより前のリセットでは使用回数を消さない）
+    private func joinCurrentGeneration() {
+        saveLocalGeneration(readCloudGeneration() ?? .first)
+        local.set(now(), forKey: Self.joinedAtDefaultsKey)
+    }
+
+    /// iCloudの状態を読み、世代・このMacの欄・古い欄を整える
+    private func applyCloudState() {
+        let macID = requireMacID()
         if cloud.object(forKey: Self.removedKey(macID)) != nil {
             // オフラインのあいだに書いた欄が残っていれば消す
             cloud.removeObject(forKey: Self.macKey(macID))
@@ -228,32 +290,32 @@ final class UsageSync: ObservableObject {
             return
         }
 
-        let cloudGenerationValue = cloud.object(forKey: Self.generationKey)
-        let cloudGeneration: Int?
-        if let cloudGenerationValue {
-            guard let value = cloudGenerationValue as? Int else {
-                reportMalformed(key: Self.generationKey, value: cloudGenerationValue)
+        let cloudGeneration: Generation?
+        if let value = cloud.object(forKey: Self.generationKey) {
+            guard let generation = Self.decodeGeneration(value) else {
+                // 世代が読めないまま書くと、ほかのMacの使用回数を誤って消しかねないため、iCloudには書かない
                 recompute()
                 return
             }
-            cloudGeneration = value
+            cloudGeneration = generation
         } else {
             cloudGeneration = nil
         }
 
-        // iCloudに世代番号がなければ、最初の世代（1）とみなす。書き込みは、すべてのMacのリセットで初めて行う
-        if adoptCloudGeneration {
-            // 同期をオンにしたとき・初めて読み込んだとき・Apple IDが変わったときは、iCloudの世代にそのまま合わせる。
-            // 手元に残っている古い世代番号を書くと、ほかのMacの使用回数を消してしまうため、書き戻さない
-            local.set(cloudGeneration ?? 1, forKey: Self.generationDefaultsKey)
-        } else if let cloudGeneration, cloudGeneration > localGeneration {
-            // ほかのMacですべてのMacのリセットが行われた
-            thisMacCounts = [:]
-            saveThisMacCounts()
-            local.set(cloudGeneration, forKey: Self.generationDefaultsKey)
-        } else if localGeneration > (cloudGeneration ?? 1) {
+        let current = localGeneration
+        // iCloudに世代がなければ、最初の世代とみなす。世代を書くのは、すべてのMacのリセットのときと、下の書き戻しのときだけ
+        let cloudOrFirst = cloudGeneration ?? .first
+        if cloudOrFirst.number > current.number {
+            if cloudOrFirst.resetAt > joinedAt {
+                // このMacが同期に加わったあとで、ほかのMacがすべてのMacのリセットをした
+                thisMacCounts = [:]
+                saveThisMacCounts()
+            }
+            // 加わる前のリセット（iCloudのデータが届く前に同期をオンにした場合など）では、使用回数を消さずに合わせる
+            saveLocalGeneration(cloudOrFirst)
+        } else if current.number > cloudOrFirst.number {
             // 後勝ちでiCloudの世代が古い値に戻った。大きい方を正とするため書き戻す
-            cloud.set(localGeneration, forKey: Self.generationKey)
+            cloud.set(Self.encode(current), forKey: Self.generationKey)
         }
 
         writeThisMacSlotIfNeeded()
@@ -263,18 +325,17 @@ final class UsageSync: ObservableObject {
 
     /// iCloud上のこのMacの欄が、書くべき内容と異なるときだけ書く（書き込みの応酬を避けるため）
     private func writeThisMacSlotIfNeeded() {
-        guard let macID else { preconditionFailure("同期がオンなのにこのMacのIDがありません") }
-        let key = Self.macKey(macID)
-        let name = computerName()
+        let key = Self.macKey(requireMacID())
+        let generation = localGeneration.number
         if let current = cloud.object(forKey: key) as? [String: Any],
-           current["generation"] as? Int == localGeneration,
-           current["name"] as? String == name,
+           current["generation"] as? Int == generation,
+           current["name"] as? String == computerName,
            current["counts"] as? [String: Int] == thisMacCounts {
             return
         }
         cloud.set([
-            "generation": localGeneration,
-            "name": name,
+            "generation": generation,
+            "name": computerName,
             "updatedAt": now(),
             "counts": thisMacCounts,
         ] as [String: Any], forKey: key)
@@ -287,59 +348,99 @@ final class UsageSync: ObservableObject {
             guard id != macID else { continue }
             if cloud.object(forKey: Self.removedKey(id)) != nil {
                 cloud.removeObject(forKey: key)
-            } else if let slot = cloud.object(forKey: key) as? [String: Any], let generation = slot["generation"] as? Int, generation < localGeneration {
+            } else if let slot = cloud.object(forKey: key) as? [String: Any], let generation = slot["generation"] as? Int, generation < localGeneration.number {
                 cloud.removeObject(forKey: key)
             }
         }
     }
 
-    /// 表示に使う使用回数と、同期中のMacの一覧を作り直す
+    /// 表示に使う使用回数、同期中のMacの一覧、読めなかったキーを作り直す
     private func recompute() {
         guard isEnabled, let macID else {
-            totals = thisMacCounts
-            macs = []
+            update(totals: thisMacCounts, macs: [], malformedKeys: [])
             return
         }
+        let generation = localGeneration.number
         var sum = thisMacCounts
         var others: [Mac] = []
+        var malformed: Set<String> = []
+        if let value = cloud.object(forKey: Self.generationKey), Self.decodeGeneration(value) == nil {
+            malformed.insert(Self.generationKey)
+            logMalformedOnce(key: Self.generationKey, value: value)
+        }
         for key in cloud.allKeys where key.hasPrefix(Self.macKeyPrefix) {
             let id = String(key.dropFirst(Self.macKeyPrefix.count))
             guard id != macID, cloud.object(forKey: Self.removedKey(id)) == nil, let value = cloud.object(forKey: key) else { continue }
             guard let slot = value as? [String: Any],
-                  let generation = slot["generation"] as? Int,
+                  let slotGeneration = slot["generation"] as? Int,
                   let name = slot["name"] as? String,
                   let updatedAt = slot["updatedAt"] as? Date,
                   let counts = slot["counts"] as? [String: Int] else {
                 // 1台分の欄が壊れていても、ほかのMacの同期は続ける
-                reportMalformed(key: key, value: value)
+                malformed.insert(key)
+                logMalformedOnce(key: key, value: value)
                 continue
             }
-            guard generation == localGeneration else { continue }
+            guard slotGeneration == generation else { continue }
             sum.merge(counts, uniquingKeysWith: +)
             others.append(Mac(id: id, name: name, updatedAt: updatedAt, isThisMac: false))
         }
         let thisSlot = cloud.object(forKey: Self.macKey(macID)) as? [String: Any]
-        let thisMac = Mac(id: macID, name: computerName(), updatedAt: thisSlot?["updatedAt"] as? Date ?? now(), isThisMac: true)
-        totals = sum
-        macs = [thisMac] + others.sorted { ($0.name, $0.id) < ($1.name, $1.id) }
+        let thisMac = Mac(id: macID, name: computerName, updatedAt: thisSlot?["updatedAt"] as? Date, isThisMac: true)
+        update(totals: sum, macs: [thisMac] + others.sorted { ($0.name, $0.id) < ($1.name, $1.id) }, malformedKeys: malformed)
+    }
+
+    /// 値が変わったときだけ更新する（同じ値で表示を作り直さないため）
+    private func update(totals: [String: Int], macs: [Mac], malformedKeys: Set<String>) {
+        if self.totals != totals { self.totals = totals }
+        if self.macs != macs { self.macs = macs }
+        if self.malformedKeys != malformedKeys { self.malformedKeys = malformedKeys }
     }
 
     // MARK: - 手元の状態
 
     private var macID: String? { local.string(forKey: Self.macIDDefaultsKey) }
 
-    /// 手元に記録した世代番号（記録がなければ最初の世代の1）
-    private var localGeneration: Int {
-        let stored = local.integer(forKey: Self.generationDefaultsKey)
-        return stored == 0 ? 1 : stored
+    private func requireMacID() -> String {
+        guard let macID else { preconditionFailure("同期がオンなのにこのMacのIDがありません") }
+        return macID
     }
 
-    private func readCloudGeneration() -> Int? {
-        cloud.object(forKey: Self.generationKey) as? Int
+    /// 手元に記録した世代（記録がなければ最初の世代）
+    private var localGeneration: Generation {
+        guard let number = local.object(forKey: Self.generationNumberDefaultsKey) as? Int,
+              let resetAt = local.object(forKey: Self.generationResetAtDefaultsKey) as? Date else {
+            return .first
+        }
+        return Generation(number: number, resetAt: resetAt)
+    }
+
+    private func saveLocalGeneration(_ generation: Generation) {
+        local.set(generation.number, forKey: Self.generationNumberDefaultsKey)
+        local.set(generation.resetAt, forKey: Self.generationResetAtDefaultsKey)
+    }
+
+    /// このMacが今のIDで同期に加わった日時
+    private var joinedAt: Date {
+        guard let date = local.object(forKey: Self.joinedAtDefaultsKey) as? Date else {
+            preconditionFailure("同期がオンなのに、同期に加わった日時がありません")
+        }
+        return date
+    }
+
+    /// iCloudの世代。形式が不正ならログに記録してnil（呼び出し側は、不正なら書かない方に倒す）
+    private func readCloudGeneration() -> Generation? {
+        guard let value = cloud.object(forKey: Self.generationKey) else { return nil }
+        guard let generation = Self.decodeGeneration(value) else {
+            logMalformedOnce(key: Self.generationKey, value: value)
+            return nil
+        }
+        return generation
     }
 
     private func leaveSync() {
         local.removeObject(forKey: Self.macIDDefaultsKey)
+        local.removeObject(forKey: Self.joinedAtDefaultsKey)
         setEnabled(false)
         recompute()
     }
@@ -358,9 +459,22 @@ final class UsageSync: ObservableObject {
         local.set(thisMacCounts, forKey: Self.countsDefaultsKey)
     }
 
-    private func reportMalformed(key: String, value: Any) {
+    private func logMalformedOnce(key: String, value: Any) {
+        guard loggedMalformedKeys.insert(key).inserted else { return }
         logger.error("iCloud上の値の形式が想定と異なります: \(key, privacy: .public) = \(String(describing: value), privacy: .public)")
-        lastError = .malformedValue(key: key)
+    }
+
+    // MARK: - iCloud上の形式
+
+    static func encode(_ generation: Generation) -> [String: Any] {
+        ["number": generation.number, "resetAt": generation.resetAt]
+    }
+
+    static func decodeGeneration(_ value: Any) -> Generation? {
+        guard let dictionary = value as? [String: Any],
+              let number = dictionary["number"] as? Int,
+              let resetAt = dictionary["resetAt"] as? Date else { return nil }
+        return Generation(number: number, resetAt: resetAt)
     }
 
     private static func macKey(_ id: String) -> String { macKeyPrefix + id }

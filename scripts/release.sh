@@ -47,9 +47,13 @@ xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1 \
 
 # 名前が一致するプロビジョニングプロファイルを探し、有効期限とiCloud KVSの許可を確かめる
 PROFILE_PLIST="$(mktemp -t emojibako-profile)"
+trap 'rm -f "$PROFILE_PLIST"' EXIT
 FOUND_PROFILE=""
 for f in "$PROFILES_DIR"/*.provisionprofile(N); do
-  security cms -D -i "$f" > "$PROFILE_PLIST" 2>/dev/null || continue
+  if ! security cms -D -i "$f" > "$PROFILE_PLIST" 2>/dev/null; then
+    print -u2 -- "⚠️ 読めないプロファイルを飛ばします: ${f}"
+    continue
+  fi
   [[ "$(plutil -extract Name raw -o - "$PROFILE_PLIST")" == "$PROVISIONING_PROFILE_NAME" ]] || continue
   [[ -z "$FOUND_PROFILE" ]] || fail "「${PROVISIONING_PROFILE_NAME}」という名前のプロファイルが複数あります。古いものを${PROFILES_DIR}から取り除いてください: ${FOUND_PROFILE} / ${f}"
   FOUND_PROFILE="$f"
@@ -57,8 +61,9 @@ for f in "$PROFILES_DIR"/*.provisionprofile(N); do
   [[ "$EXPIRATION" > "$(date -u +%Y-%m-%dT%H:%M:%SZ)" ]] || fail "プロファイル「${PROVISIONING_PROFILE_NAME}」の有効期限（${EXPIRATION}）が切れています。スクリプト冒頭の手順3で作り直してください。"
   [[ "$(plutil -extract Entitlements.com\\.apple\\.developer\\.ubiquity-kvstore-identifier raw -o - "$PROFILE_PLIST" 2>/dev/null)" == "${TEAM_ID}."* ]] \
     || fail "プロファイル「${PROVISIONING_PROFILE_NAME}」にiCloud key-value storageの許可がありません。App IDでiCloudを有効にしてから作り直してください。"
+  [[ "$(plutil -extract Entitlements.com\\.apple\\.application-identifier raw -o - "$PROFILE_PLIST" 2>/dev/null)" == "${TEAM_ID}.${BUNDLE_ID}" ]] \
+    || fail "プロファイル「${PROVISIONING_PROFILE_NAME}」のApp IDが${TEAM_ID}.${BUNDLE_ID}ではありません。"
 done
-rm -f "$PROFILE_PLIST"
 [[ -n "$FOUND_PROFILE" ]] || fail "プロファイル「${PROVISIONING_PROFILE_NAME}」が${PROFILES_DIR}にありません。スクリプト冒頭の手順3を行ってください。"
 
 print "署名に使う証明書: $IDENTITY"
@@ -90,7 +95,8 @@ VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$APP/Co
 [[ "$(lipo -archs "$APP/Contents/MacOS/EmojiBako")" == "arm64" ]] || fail "arm64のみのバイナリになっていません"
 codesign --verify --strict --deep "$APP"
 [[ -f "$APP/Contents/embedded.provisionprofile" ]] || fail "書き出したアプリにプロビジョニングプロファイルが埋め込まれていません"
-KVS_ID="$(codesign -d --entitlements - --xml "$APP" 2>/dev/null | plutil -extract com\\.apple\\.developer\\.ubiquity-kvstore-identifier raw -o - -)"
+KVS_ID="$(codesign -d --entitlements - --xml "$APP" 2>/dev/null | plutil -extract com\\.apple\\.developer\\.ubiquity-kvstore-identifier raw -o - -)" \
+  || fail "書き出したアプリの署名にiCloud KVSのentitlementがありません"
 [[ "$KVS_ID" == "${TEAM_ID}.${BUNDLE_ID}" ]] || fail "署名のiCloud KVSの識別子が想定と異なります: ${KVS_ID}"
 
 # --- アプリの公証 -------------------------------------------------------------

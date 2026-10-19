@@ -42,28 +42,47 @@ private final class FakeCloudReplica: UsageCloudStore {
     }
 }
 
+/// すべてのMacで共有する時計。読むたびに1秒進む（操作の前後関係を日時で比べられるように）
+private final class TestClock {
+    private(set) var current = Date(timeIntervalSince1970: 1_800_000_000)
+    func now() -> Date {
+        current += 1
+        return current
+    }
+}
+
 /// 1台のMac（手元の保存先、iCloudの偽物、UsageSync）
+@MainActor
 private final class FakeMac {
     let defaults: UserDefaults
     let suiteName: String
     let cloud: FakeCloudReplica
+    let clock: TestClock
     var name: String
-    var clock: Date
+    var hardwareID: String
+    var iCloudIdentity: Data? = Data("account-1".utf8)
     private(set) var sync: UsageSync!
 
-    init(name: String, server: FakeCloudServer, prepareDefaults: (UserDefaults) -> Void = { _ in }) {
+    init(name: String, server: FakeCloudServer, clock: TestClock, prepareDefaults: (UserDefaults) -> Void = { _ in }) {
         self.name = name
+        self.clock = clock
+        hardwareID = "hardware-\(name)"
         suiteName = "EmojiBakoTests-\(UUID().uuidString)"
         defaults = UserDefaults(suiteName: suiteName)!
         cloud = FakeCloudReplica(server: server)
-        clock = Date(timeIntervalSince1970: 1_800_000_000)
         prepareDefaults(defaults)
         launch()
     }
 
     /// アプリを起動し直す（手元の保存先とiCloudの手元の写しはそのまま）
     func launch() {
-        sync = UsageSync(local: defaults, cloud: cloud, computerName: { [unowned self] in self.name }, now: { [unowned self] in self.clock })
+        sync = UsageSync(local: defaults, cloud: cloud, computerName: name, hardwareID: hardwareID, now: clock.now)
+        sync.start(iCloudIdentity: iCloudIdentity)
+    }
+
+    func rename(_ newName: String) {
+        name = newName
+        sync.computerNameDidChange(to: newName)
     }
 
     func use(_ emoji: String, times: Int = 1) {
@@ -71,12 +90,15 @@ private final class FakeMac {
     }
 }
 
+@MainActor
 final class UsageSyncTests: XCTestCase {
     private var server: FakeCloudServer!
+    private var clock: TestClock!
     private var macs: [FakeMac] = []
 
     override func setUp() {
         server = FakeCloudServer()
+        clock = TestClock()
         macs = []
     }
 
@@ -85,7 +107,7 @@ final class UsageSyncTests: XCTestCase {
     }
 
     private func makeMac(_ name: String, prepareDefaults: (UserDefaults) -> Void = { _ in }) -> FakeMac {
-        let mac = FakeMac(name: name, server: server, prepareDefaults: prepareDefaults)
+        let mac = FakeMac(name: name, server: server, clock: clock, prepareDefaults: prepareDefaults)
         macs.append(mac)
         return mac
     }
@@ -203,11 +225,11 @@ final class UsageSyncTests: XCTestCase {
         a.sync.enable(); b.sync.enable()
         a.sync.resetAllMacs()
         syncAll()
-        // 後勝ちで古い世代番号がiCloudに書かれた状態
-        server.values[UsageSync.generationKey] = 1
+        // 後勝ちで古い世代がiCloudに書かれた状態
+        server.values[UsageSync.generationKey] = UsageSync.encode(.first)
         syncAll()
 
-        XCTAssertEqual(server.values[UsageSync.generationKey] as? Int, 2)
+        XCTAssertEqual((server.values[UsageSync.generationKey]).flatMap(UsageSync.decodeGeneration)?.number, 2)
     }
 
     // MARK: - このMacのリセット（Q16・Q26）
@@ -262,7 +284,8 @@ final class UsageSyncTests: XCTestCase {
     func testEnablingWithStaleLocalGenerationDoesNotResetOtherMacs() {
         let a = makeMac("MacA"), b = makeMac("MacB")
         // MacBは以前、別の場所で世代3まで進めた記録を持っている
-        b.defaults.set(3, forKey: UsageSync.generationDefaultsKey)
+        b.defaults.set(3, forKey: UsageSync.generationNumberDefaultsKey)
+        b.defaults.set(Date(timeIntervalSince1970: 1_700_000_000), forKey: UsageSync.generationResetAtDefaultsKey)
         a.sync.enable()
         a.use("😀")
         syncAll()
@@ -310,9 +333,7 @@ final class UsageSyncTests: XCTestCase {
         a.use("😀", times: 2)
         syncAll()
         // 別のApple IDに切り替わり、iCloudのデータが新しいアカウントのものに置き換わった
-        let otherAccount = FakeCloudServer()
-        otherAccount.values = ["mac.other": ["generation": 1, "name": "OtherMac", "updatedAt": Date(), "counts": ["🍣": 3]] as [String: Any]]
-        server.values = otherAccount.values
+        server.values = ["mac.other": ["generation": 1, "name": "OtherMac", "updatedAt": Date(), "counts": ["🍣": 3]] as [String: Any]]
 
         syncAll(reason: .accountChange)
 
@@ -325,13 +346,13 @@ final class UsageSyncTests: XCTestCase {
     func testMacListShowsNamesAndUpdatedAt() {
         let a = makeMac("MacA"), b = makeMac("MacB")
         a.sync.enable(); b.sync.enable()
-        b.clock = Date(timeIntervalSince1970: 1_800_000_500)
         b.use("🎉")
+        let bWroteAt = clock.current
         syncAll()
 
         XCTAssertEqual(a.sync.macs.map(\.name), ["MacA", "MacB"])
         XCTAssertEqual(a.sync.macs.map(\.isThisMac), [true, false])
-        XCTAssertEqual(a.sync.macs[1].updatedAt, Date(timeIntervalSince1970: 1_800_000_500))
+        XCTAssertEqual(a.sync.macs[1].updatedAt, bWroteAt)
     }
 
     func testComputerNameChangeIsReflectedOnOtherMacs() {
@@ -339,8 +360,7 @@ final class UsageSyncTests: XCTestCase {
         a.sync.enable(); b.sync.enable()
         syncAll()
 
-        b.name = "MacB Pro"
-        b.sync.computerNameDidChange()
+        b.rename("MacB Pro")
         syncAll()
 
         XCTAssertEqual(a.sync.macs.map(\.name), ["MacA", "MacB Pro"])
@@ -434,7 +454,7 @@ final class UsageSyncTests: XCTestCase {
         syncAll()
 
         XCTAssertEqual(a.sync.totals, ["😀": 1])
-        XCTAssertEqual(a.sync.lastError, .malformedValue(key: "mac.broken"))
+        XCTAssertEqual(a.sync.malformedKeys, ["mac.broken"])
     }
 
     func testQuotaViolationIsReported() {
@@ -442,7 +462,153 @@ final class UsageSyncTests: XCTestCase {
         a.sync.enable()
 
         a.sync.cloudDidChange(reason: .quotaViolation)
+        a.sync.cloudDidChange(reason: .serverChange)
 
-        XCTAssertEqual(a.sync.lastError, .quotaExceeded)
+        XCTAssertTrue(a.sync.isQuotaExceeded, "ほかの変更が届いても、容量超過の表示は残す")
+        a.sync.resetThisMac()
+        XCTAssertFalse(a.sync.isQuotaExceeded, "使用回数を減らす操作をしたら消す")
+    }
+
+    // MARK: - レビューで見つかった筋書き
+
+    /// 移行アシスタントなどで、同期中のMacの保存データが別のMacに写った
+    func testCopiedDefaultsWithSyncOnJoinAsNewMacWithoutDoubleCounting() {
+        let a = makeMac("MacA")
+        a.sync.enable()
+        a.use("😀", times: 3)
+        syncAll()
+        let c = makeMac("MacC") { defaults in
+            for (key, value) in a.defaults.dictionaryRepresentation() where key.hasPrefix("usage.") {
+                defaults.set(value, forKey: key)
+            }
+        }
+        c.use("🎉")
+        syncAll()
+
+        XCTAssertNotEqual(c.defaults.string(forKey: UsageSync.macIDDefaultsKey), a.defaults.string(forKey: UsageSync.macIDDefaultsKey))
+        XCTAssertEqual(c.sync.thisMacCounts, ["🎉": 1], "写す前のMacの使用回数はiCloudにあるので捨てる")
+        XCTAssertEqual(a.sync.totals, ["😀": 3, "🎉": 1])
+        XCTAssertEqual(c.sync.totals, ["😀": 3, "🎉": 1])
+    }
+
+    func testCopiedDefaultsWithSyncOffKeepCounts() {
+        let a = makeMac("MacA")
+        a.use("😀", times: 3)
+        let c = makeMac("MacC") { defaults in
+            for (key, value) in a.defaults.dictionaryRepresentation() where key.hasPrefix("usage.") {
+                defaults.set(value, forKey: key)
+            }
+        }
+        c.launch()
+
+        XCTAssertEqual(c.sync.totals, ["😀": 3])
+    }
+
+    /// iCloudのデータが届く前に同期をオンにし、そのあと加わる前のリセットの世代が届いた
+    func testResetMadeBeforeJoiningDoesNotClearCountsWhenItArrivesLate() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        a.sync.enable()
+        a.sync.resetAllMacs()
+        a.sync.resetAllMacs()
+        a.use("🎉")
+        syncAll([a])
+        b.use("😀", times: 5)
+
+        b.sync.enable()
+        syncAll(reason: .serverChange)
+
+        XCTAssertEqual(b.sync.thisMacCounts, ["😀": 5])
+        XCTAssertEqual(a.sync.totals, ["😀": 5, "🎉": 1])
+    }
+
+    /// 同期がオンのまま終了しているあいだに、ほかのMacでリセットされた
+    func testResetLearnedAtLaunchClearsCounts() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        a.sync.enable(); b.sync.enable()
+        b.use("😀", times: 2)
+        syncAll()
+        a.sync.resetAllMacs()
+        syncAll([a])
+        _ = b.cloud.pull()
+
+        b.launch()
+
+        XCTAssertEqual(b.sync.thisMacCounts, [:])
+        XCTAssertEqual(b.sync.totals, [:])
+    }
+
+    /// アプリを終了しているあいだにAppleアカウントが変わった
+    func testAccountChangedWhileNotRunningDoesNotWriteOldGeneration() {
+        let a = makeMac("MacA")
+        a.sync.enable()
+        a.sync.resetAllMacs()
+        a.sync.resetAllMacs()
+        a.use("😀")
+        syncAll()
+        // 新しいアカウントには、世代のないほかのMacの欄がある
+        server.values = ["mac.other": ["generation": 1, "name": "OtherMac", "updatedAt": Date(), "counts": ["🍣": 3]] as [String: Any]]
+        _ = a.cloud.pull()
+        a.iCloudIdentity = Data("account-2".utf8)
+
+        a.launch()
+        syncAll()
+
+        XCTAssertNil(server.values[UsageSync.generationKey], "古いアカウントの世代を書かない")
+        XCTAssertEqual(a.sync.totals, ["😀": 1, "🍣": 3])
+    }
+
+    func testMalformedGenerationIsReportedAndNotOverwritten() {
+        let a = makeMac("MacA")
+        a.sync.enable()
+        a.use("😀")
+        syncAll()
+        server.values[UsageSync.generationKey] = 5
+
+        syncAll()
+
+        XCTAssertEqual(a.sync.malformedKeys, [UsageSync.generationKey])
+        XCTAssertEqual(server.values[UsageSync.generationKey] as? Int, 5)
+        XCTAssertEqual(a.sync.totals, ["😀": 1])
+        a.sync.resetAllMacs()
+        syncAll()
+        XCTAssertEqual((server.values[UsageSync.generationKey]).flatMap(UsageSync.decodeGeneration)?.number, 2, "すべてのMacのリセットで正しい形式に書き直す")
+    }
+
+    func testRemovedNoticeSurvivesRelaunchUntilDismissed() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        a.sync.enable(); b.sync.enable()
+        syncAll()
+        a.sync.removeMac(id: a.sync.macs.first { !$0.isThisMac }!.id)
+        syncAll()
+
+        b.launch()
+        XCTAssertTrue(b.sync.wasRemovedByOtherMac)
+        b.sync.dismissRemovedNotice()
+        b.launch()
+        XCTAssertFalse(b.sync.wasRemovedByOtherMac)
+    }
+
+    func testMalformedV1_0_0DataIsRemoved() {
+        let a = makeMac("MacA") { $0.set("broken", forKey: "emojiUsageCounts") }
+
+        XCTAssertEqual(a.sync.totals, [:])
+        XCTAssertNil(a.defaults.object(forKey: "emojiUsageCounts"))
+    }
+
+    func testSettledStateDoesNotWriteOnInitialSyncOrRepeatedAccountChange() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        a.sync.enable(); b.sync.enable()
+        a.use("😀"); b.use("🎉")
+        syncAll()
+        a.sync.cloudDidChange(reason: .accountChange)
+        syncAll()
+        let writes = (a.cloud.writeCount, b.cloud.writeCount)
+
+        a.sync.cloudDidChange(reason: .initialSync)
+        a.sync.cloudDidChange(reason: .accountChange)
+        b.sync.cloudDidChange(reason: .initialSync)
+
+        XCTAssertEqual(a.cloud.writeCount, writes.0)
+        XCTAssertEqual(b.cloud.writeCount, writes.1)
     }
 }
