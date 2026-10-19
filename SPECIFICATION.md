@@ -152,7 +152,7 @@ IMEで変換中の文字があるあいだは、すべてのキー入力をIME�
 
 ## 使用回数の同期
 
-同じApple IDでサインインしたMac同士で、iCloudのキーと値の保存（`NSUbiquitousKeyValueStore`、以下KVS）を通して使用回数を同期する（[ADR 0003](docs/adr/0003-usage-sync-with-icloud-kvs.md)）。設定の「同期」タブでオンにする（初期値はオフ）。同期するのは使用回数だけで、ほかの設定は同期しない。
+同じApple IDでサインインしたMac同士で、iCloudのキーと値の保存（`NSUbiquitousKeyValueStore`、以下KVS）を通して使用回数を同期する（[ADR 0003](docs/adr/0003-usage-sync-with-icloud-kvs.md)）。設定画面の「同期」の欄でオンにする（初期値はオフ）。同期するのは使用回数だけで、ほかの設定は同期しない。
 
 ### iCloud上のデータ
 
@@ -233,6 +233,8 @@ IMEで変換中の文字があるあいだは、すべてのキー入力をIME�
 - ショートカット（ホットキーの記録ボタン）
 
 ### 同期
+
+「キーボード」と「情報」のあいだに置く。
 
 - iCloudで使用回数を同期する（スイッチ、初期値はオフ）。オンにするとiCloudと通信し、使用回数とコンピュータ名を利用者自身のiCloudに保存することを書き添える
 - iCloudの状態（サインインしていない、エラー）と、ほかのMacで同期から外されたこと
@@ -329,6 +331,7 @@ emoji-picker/
 │   ├── HotKeyRecorder.swift       # ホットキーを記録するUI
 │   ├── UpdateChecker.swift        # 更新確認
 │   ├── SettingsView.swift         # 設定画面
+│   ├── UsageSyncSettingsView.swift # 設定画面の「同期」の欄
 │   ├── Localizable.xcstrings      # 日本語と英語の文字列
 │   ├── EmojiBako.entitlements     # iCloud KVSのentitlement
 │   └── emoji-data.json            # 絵文字データ（生成物）

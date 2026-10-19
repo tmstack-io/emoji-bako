@@ -57,6 +57,11 @@ struct SettingsView: View {
                 .padding(.vertical, 4)
             }
             
+            // 同期
+            GroupBox(label: Text("同期").fontWeight(.semibold)) {
+                UsageSyncSettingsView(sync: EmojiData.shared.usageSync)
+            }
+
             // 情報
             GroupBox(label: Text("情報").fontWeight(.semibold)) {
                 HStack {

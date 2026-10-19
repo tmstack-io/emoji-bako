@@ -87,24 +87,6 @@
         }
       }
     },
-    "Frequently Used": {
-      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Frequently Used"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "よく使う絵文字"
-          }
-        }
-      }
-    },
     "Flags": {
       "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
       "extractionState": "manual",
@@ -137,6 +119,24 @@
           "stringUnit": {
             "state": "translated",
             "value": "食べ物と飲み物"
+          }
+        }
+      }
+    },
+    "Frequently Used": {
+      "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frequently Used"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "よく使う絵文字"
           }
         }
       }
@@ -251,6 +251,56 @@
         }
       }
     },
+    "iCloudで使用回数を同期する": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync usage counts with iCloud"
+          }
+        }
+      }
+    },
+    "iCloudにサインインしていないため、このMacにだけ記録しています。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not signed in to iCloud. Usage counts are recorded on this Mac only."
+          }
+        }
+      }
+    },
+    "iCloudの保存容量の上限を超えたため、同期できません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cannot sync because the iCloud storage limit for EmojiBako has been exceeded."
+          }
+        }
+      }
+    },
+    "iCloudを使えないため、このMacにだけ記録しています。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud is unavailable. Usage counts are recorded on this Mac only."
+          }
+        }
+      }
+    },
+    "iCloud上のデータの一部（%@）を読み取れませんでした。そのデータは合計に入れていません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not read part of the data in iCloud (%@). It is not included in the totals."
+          }
+        }
+      }
+    },
     "macOSのショートカットで使われています": {
       "localizations": {
         "en": {
@@ -271,6 +321,16 @@
         }
       }
     },
+    "「%@」を同期から外しますか？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove “%@” from sync?"
+          }
+        }
+      }
+    },
     "あとで": {
       "localizations": {
         "en": {
@@ -281,12 +341,102 @@
         }
       }
     },
+    "このMac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Mac"
+          }
+        }
+      }
+    },
+    "このMacで数えた使用回数だけを消します。ほかのMacの使用回数は残るため、よく使う絵文字が大きくは変わらないことがあります。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only the usage counts recorded on this Mac will be cleared. Counts from other Macs remain, so Frequently Used may not change much."
+          }
+        }
+      }
+    },
+    "このMacの使用回数をリセット…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Usage Counts on This Mac…"
+          }
+        }
+      }
+    },
+    "このMacの使用回数をリセットしますか？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset usage counts on this Mac?"
+          }
+        }
+      }
+    },
+    "このMacの使用回数を消します。この操作は取り消せません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The usage counts on this Mac will be cleared. This cannot be undone."
+          }
+        }
+      }
+    },
     "このキーはショートカットに使えません": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "This key can't be used for a shortcut"
+          }
+        }
+      }
+    },
+    "すべてのMacの使用回数をリセット…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset Usage Counts on All Macs…"
+          }
+        }
+      }
+    },
+    "すべてのMacの使用回数をリセットしますか？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset usage counts on all Macs?"
+          }
+        }
+      }
+    },
+    "そのMacの使用回数を合計から除きます。そのMacでは同期がオフになり、そのMacで数えた使用回数はそのMacに残ります。もう一度同期するには、そのMacで同期をオンにしてください。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its usage counts will be removed from the totals. Sync will be turned off on that Mac, and the counts recorded there will stay on that Mac. To sync it again, turn on sync on that Mac."
+          }
+        }
+      }
+    },
+    "ほかのMacで、このMacが同期から外されました。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Mac was removed from sync on another Mac."
           }
         }
       }
@@ -317,6 +467,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Website"
+          }
+        }
+      }
+    },
+    "オンにすると、使用回数とこのMacのコンピュータ名をあなたのiCloudに保存し、同じApple IDのMac同士でよく使う絵文字をそろえます。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When on, usage counts and this Mac’s computer name are stored in your iCloud, so Frequently Used matches across your Macs signed in with the same Apple Account."
+          }
+        }
+      }
+    },
+    "キャンセル": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
           }
         }
       }
@@ -421,6 +591,16 @@
         }
       }
     },
+    "リセット": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset"
+          }
+        }
+      }
+    },
     "ログイン時に起動": {
       "localizations": {
         "en": {
@@ -461,12 +641,72 @@
         }
       }
     },
+    "同期": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync"
+          }
+        }
+      }
+    },
+    "同期から外す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from Sync"
+          }
+        }
+      }
+    },
+    "同期から外す…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from Sync…"
+          }
+        }
+      }
+    },
+    "同期しているすべてのMacの使用回数を消します。オフラインのMacでまだ届いていない使用回数も消えます。この操作は取り消せません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usage counts on all synced Macs will be cleared, including counts from offline Macs that have not arrived yet. This cannot be undone."
+          }
+        }
+      }
+    },
+    "同期中のMac": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synced Macs"
+          }
+        }
+      }
+    },
     "情報": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "About"
+          }
+        }
+      }
+    },
+    "最後に記録: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last recorded: %@"
           }
         }
       }
@@ -517,6 +757,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Search emoji"
+          }
+        }
+      }
+    },
+    "表示を消す": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dismiss"
           }
         }
       }
