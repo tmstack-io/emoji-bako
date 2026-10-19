@@ -58,7 +58,7 @@
 
 | ID | 表示名（英語） | 表示名（日本語） | カテゴリアイコン |
 |----|----------------|------------------|------------------|
-| favorites | Favorites | よく使う絵文字 | star.fill |
+| favorites | Frequently Used | よく使う絵文字 | star.fill |
 | smileys | Smileys | 顔と感情 | face.smiling |
 | people | People | 人と体 | person |
 | animals | Animals & Nature | 動物と自然 | hare |
@@ -140,12 +140,59 @@ IMEで変換中の文字があるあいだは、すべてのキー入力をIME�
 
 ---
 
-## よく使う絵文字（Favorites）
+## よく使う絵文字
 
-- 絵文字ごとの使用回数を数えて`UserDefaults`に保存する
-- Favoritesカテゴリでは使用回数の多い順に最大50件を表示する
-- 使用回数に絵文字データにない絵文字（新しい版で使ったものを古い版で読んだ場合など）があれば、起動時にログに記録し、よく使う絵文字の表示からは外す。保存データは消さない（同じ版に戻せば再び表示される）
-- 使用回数の保存データの形式が不正な場合は、ログに記録して使用回数なしで始める
+- 絵文字ごとの使用回数を数える。よく使う絵文字のカテゴリでは、使用回数の多い順に最大50件を表示する
+- 使用回数の同期がオンのときは同期中のMacの使用回数の合計、オフのときはこのMacで数えた使用回数で並べる
+- 使用回数に絵文字データにない絵文字（新しい版で使ったものを古い版で読んだ場合など）があれば、ログに記録し、よく使う絵文字の表示からは外す。保存データは消さない（同じ版に戻せば再び表示される）
+- 手元の保存データ（`UserDefaults`）の形式が不正な場合は、ログに記録して使用回数なしで始める
+- v1.0.0の保存データ（`emojiUsageCounts`）があれば、起動時に一度だけこのMacの使用回数へ移し、古いデータを消す
+
+---
+
+## 使用回数の同期
+
+同じApple IDでサインインしたMac同士で、iCloudのキーと値の保存（`NSUbiquitousKeyValueStore`、以下KVS）を通して使用回数を同期する（[ADR 0003](docs/adr/0003-usage-sync-with-icloud-kvs.md)）。設定の「同期」タブでオンにする（初期値はオフ）。同期するのは使用回数だけで、ほかの設定は同期しない。
+
+### iCloud上のデータ
+
+| キー | 値 | 書くMac |
+|------|----|---------|
+| `generation` | リセットの世代番号（整数、1から） | すべてのMacのリセットをしたMac |
+| `mac.<ID>` | そのMacの欄（`generation`、`name`、`updatedAt`、`counts`） | そのMac自身だけ |
+| `removed.<ID>` | 同期から外したMacの記録（`true`） | 同期から外す操作をしたMac |
+
+- `<ID>`は、同期をオンにしたときにMacごとに作るランダムなUUID。Macの名前ではなくこのIDで区別する
+- `name`はコンピュータ名（システム設定の「一般」→「共有」）。変更されたら、その場で書き直す
+- `updatedAt`は、そのMacが最後に欄を書いた日時（そのMacの時計）
+- `counts`は、そのMacが現在の世代で数えた使用回数（絵文字→回数）
+- `generation`は、手元に覚えている値とiCloudの値の大きい方を採る。手元の方が大きければiCloudに書き戻す
+- 表示に使う合計は、`generation`が現在の世代と一致し、`removed.<ID>`のない欄の`counts`の和
+- 前の世代の欄と、外されたMacの欄は、見つけたMacが消す。`removed.<ID>`は消さない
+
+### 同期のオンとオフ
+
+- **オンにしたとき**（Apple IDが変わったときも同じ）: このMacの使用回数を、iCloudの現在の世代のこのMacの欄に書く。手元の使用回数は消えない
+- **オフにしたとき**: iCloud上のこのMacの欄を消す（ほかのMacの一覧と合計から外れる）。ほかのMacの使用回数を手元から消し、このMacで数えた使用回数だけで表示する
+
+### リセット
+
+- **すべてのMacのリセット**（同期がオンのときだけ）: `generation`を1つ増やし、このMacの使用回数を消す。ほかのMacは、新しい世代を知った時点で自分の使用回数を消す。リセットを知る前にオフラインのMacで数えた使用回数も消える
+- **このMacのリセット**: このMacの使用回数だけを消す。`generation`は変えない
+- どちらも確認画面を出す
+
+### 同期から外す
+
+- 同期中のMacの一覧で、ほかのMacを同期から外せる。このMacの行には外すボタンを出さない（同期をオフにすればよい）
+- 外すと`removed.<ID>`を書き、そのMacの欄を消す。合計からはすぐに除かれる
+- 外されたMacは、自分の`removed.<ID>`を見つけた時点で同期をオフにし、設定画面に「ほかのMacで、このMacが同期から外されました」と表示する。手元の使用回数は残る
+- 外されたMacで同期を再びオンにすると、新しいIDで加わる
+
+### iCloudが使えないとき
+
+- iCloudにサインインしていない（`FileManager.ubiquityIdentityToken`が`nil`）ときは、設定画面にその旨を表示し、使用回数はこのMacに記録し続ける
+- KVSの容量の上限を超えた、またはKVSを使えない（`synchronize()`が`false`）ときは、設定画面にエラーを表示し、ログに記録する
+- ほかのMacの変更は、KVSの変更通知（`didChangeExternallyNotification`）で受け取り、ピッカーの表示に反映する。iCloudへの反映は数秒から数分遅れることがある
 
 ---
 
@@ -169,7 +216,7 @@ IMEで変換中の文字があるあいだは、すべてのキー入力をIME�
 - 設定の「アップデートを自動で確認する」（初期値はオン）がオフのときは通信しない
 - 通信の失敗はログに残し、次回の確認に任せる
 
-外部との通信はこの更新確認だけで、解析やクラッシュレポートの送信は行わない。
+外部との通信は、この更新確認と、使用回数の同期をオンにした場合のiCloud（Appleのサーバー）との通信だけで、解析やクラッシュレポートの送信は行わない。同期をオンにすると、使用回数とコンピュータ名が利用者自身のiCloudに保存される。
 
 ---
 
@@ -184,6 +231,13 @@ IMEで変換中の文字があるあいだは、すべてのキー入力をIME�
 ### キーボード
 
 - ショートカット（ホットキーの記録ボタン）
+
+### 同期
+
+- iCloudで使用回数を同期する（スイッチ、初期値はオフ）。オンにするとiCloudと通信し、使用回数とコンピュータ名を利用者自身のiCloudに保存することを書き添える
+- iCloudの状態（サインインしていない、エラー）と、ほかのMacで同期から外されたこと
+- 同期中のMacの一覧（同期がオンのときだけ）: コンピュータ名、「このMac」の印、最後に記録した日時、「同期から外す」ボタン（このMacの行にはない）
+- 「すべてのMacの使用回数をリセット…」（同期がオンのときだけ）と「このMacの使用回数をリセット…」。どちらも確認画面を出す
 
 ### 情報
 
@@ -245,11 +299,12 @@ IMEで変換中の文字があるあいだは、すべてのキー入力をIME�
 ## 技術要件
 
 - **言語**: Swift 5
-- **フレームワーク**: SwiftUI、AppKit、Carbon（ホットキー）、ServiceManagement（ログイン時に起動）
+- **フレームワーク**: SwiftUI、AppKit、Carbon（ホットキー）、ServiceManagement（ログイン時に起動）、Foundationの`NSUbiquitousKeyValueStore`（使用回数の同期）、SystemConfiguration（コンピュータ名の変更の検出）
 - **最小OS**: macOS 14.4（Emoji 15.1の表示に必要）
 - **アーキテクチャ**: arm64のみ
 - **依存ライブラリ**: なし（[ADR 0002](docs/adr/0002-no-third-party-dependencies.md)）
 - **プロジェクト**: `project.yml`を正とし、XcodeGenで`EmojiBako.xcodeproj`を生成する
+- **署名**: 配布版はDeveloper ID証明書と、iCloudを許可するDeveloper ID用プロビジョニングプロファイル（`EmojiBako Developer ID`）で署名する。Debugビルドは Bundle ID を`io.tmstack.EmojiBako.debug`にし、使用回数・設定・iCloudの保存先を配布版と分ける
 
 ---
 
@@ -261,7 +316,7 @@ emoji-picker/
 ├── EmojiBako/
 │   ├── EmojiBakoApp.swift         # アプリ本体、メニューバー、ピッカーのウィンドウ
 │   ├── EmojiPickerView.swift      # ピッカーのUIとキー操作、絵文字の入力
-│   ├── EmojiData.swift            # 絵文字データの読み込み、Favorites
+│   ├── EmojiData.swift            # 絵文字データの読み込み、よく使う絵文字
 │   ├── EmojiSearch.swift          # 検索（正規化、索引、並び順）
 │   ├── SearchField.swift          # 変換中の文字列も通知する検索欄
 │   ├── EmojiPaster.swift          # クリップボードと⌘Vによる絵文字の入力
@@ -273,6 +328,7 @@ emoji-picker/
 │   ├── UpdateChecker.swift        # 更新確認
 │   ├── SettingsView.swift         # 設定画面
 │   ├── Localizable.xcstrings      # 日本語と英語の文字列
+│   ├── EmojiBako.entitlements     # iCloud KVSのentitlement
 │   └── emoji-data.json            # 絵文字データ（生成物）
 ├── EmojiBakoTests/                # 単体テスト
 ├── data/
@@ -306,7 +362,7 @@ emoji-picker/
 ### リリース
 
 1. `project.yml`の`CFBundleShortVersionString`を上げ、`xcodegen generate`を実行して、`project.yml`と生成された`EmojiBako.xcodeproj`・`EmojiBako/Info.plist`を一緒にコミットする
-2. `zsh scripts/release.sh`を実行する（初回だけ、スクリプト冒頭の証明書と公証用認証情報の準備が必要）
+2. `zsh scripts/release.sh`を実行する（初回だけ、スクリプト冒頭の証明書、公証用認証情報、プロビジョニングプロファイルの準備が必要）
 3. 表示されたコマンドで、タグとGitHub Releasesを作る
 
 ---
