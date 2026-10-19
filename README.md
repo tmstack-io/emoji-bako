@@ -12,7 +12,7 @@ EmojiBakoは、ホットキーで呼び出して日本語で検索できる、ma
 
 - **どこからでも呼び出せる**: 初期設定では`⌘.`でピッカーが開きます。ホットキーは設定画面で変更できます。
 - **日本語で検索できる**: 「ねこ」「ネコ」「猫」「cat」のどれでも🐈が見つかります。IMEで変換中のひらがなでも絞り込めます。
-- **よく使う絵文字が先頭に並ぶ**: 使用回数の多い絵文字から表示します。
+- **よく使う絵文字が先頭に並ぶ**: 使用回数の多い絵文字から表示します。iCloudで同期すると、同じApple IDのMac同士でよく使う絵文字がそろいます（設定でオンにします）。
 - **クリップボードを元に戻す**: 絵文字の入力に一時的に使ったクリップボードは、画像やファイルなどの形式も含めて元の内容に戻します（提供元のアプリが後からデータを渡す形式など、戻せないものもあります）。
 
 ### 動作環境
@@ -43,7 +43,8 @@ EmojiBakoは、ホットキーで呼び出して日本語で検索できる、ma
 
 - **アクセシビリティ**: 選んだ絵文字を作業中のアプリに入力するために、`⌘V`のキー操作を送ります。そのために必要です。
 - **クリップボード**: 絵文字の入力のために一時的に使い、初期設定では1秒後に元の内容に戻します。クリップボード管理アプリの履歴に残さないための印も付けます。貼り付け先のアプリが遅く、絵文字ではなく元の内容が貼り付けられる場合は、設定で戻すまでの時間を長くしてください。
-- **通信**: 外部と通信するのは、GitHubで新しいバージョンを確認するときだけです（1日1回）。設定でオフにできます。解析やクラッシュレポートの送信は行いません。
+- **通信**: 外部と通信するのは、GitHubで新しいバージョンを確認するとき（1日1回、設定でオフにできます）と、使用回数の同期をオンにした場合のiCloudとの通信だけです。解析やクラッシュレポートの送信は行いません。
+- **iCloud**: 使用回数の同期をオンにすると、使用回数とMacのコンピュータ名を、あなた自身のiCloudに保存します。開発者には送られません。同期は初期設定ではオフです。
 
 ### 開発
 
@@ -69,7 +70,7 @@ EmojiBako is a menu bar emoji picker for macOS that opens with a hotkey and lets
 
 - **Open it from anywhere**: Press `⌘.` by default. You can change the hotkey in Settings.
 - **Search in Japanese or English**: 「ねこ」, 「ネコ」, 「猫」, and "cat" all find 🐈. Results update while you are still composing with a Japanese input method.
-- **Frequently used emoji first**: Emoji you use most appear first.
+- **Frequently used emoji first**: Emoji you use most appear first. Turn on iCloud sync in Settings to share them across your Macs signed in with the same Apple Account.
 - **Your clipboard is restored**: The clipboard is used briefly to type the emoji, then restored with its contents, including images and files (some formats that the source app provides on demand cannot be restored).
 
 ### Requirements
@@ -100,7 +101,8 @@ You can also click the menu bar icon to open the picker. Right-click it for Sett
 
 - **Accessibility**: EmojiBako sends `⌘V` to type the emoji you pick into the app you are working in, which requires this permission.
 - **Clipboard**: Used briefly to type the emoji and restored after 1 second by default, marked so that clipboard managers do not record it. If the previous content gets pasted instead of the emoji because the target app is slow, increase the delay in Settings.
-- **Network**: The only network access is a check for new versions on GitHub, once a day. You can turn it off in Settings. EmojiBako does not send analytics or crash reports.
+- **Network**: EmojiBako connects only to GitHub to check for new versions (once a day, can be turned off in Settings) and, if you turn on usage sync, to iCloud. It does not send analytics or crash reports.
+- **iCloud**: When usage sync is on, usage counts and your Mac’s computer name are stored in your own iCloud. They are not sent to the developer. Sync is off by default.
 
 ### License
 
