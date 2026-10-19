@@ -121,7 +121,8 @@ xcrun stapler staple "$DMG"
 
 spctl --assess --type execute --verbose=2 "$APP"
 spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG"
-shasum -a 256 "$DMG" > "$DMG.sha256"
+# 公開するファイルなので、手元のパスを含めず、ファイル名だけで照合できる形にする
+(cd "$OUT" && shasum -a 256 "${DMG:t}" > "${DMG:t}.sha256")
 
 print "\n✅ $DMG"
 print "次の手順（GitHubへの公開は内容を確認してから手動で行う）:"
