@@ -317,6 +317,7 @@ emoji-picker/
 │   ├── EmojiBakoApp.swift         # アプリ本体、メニューバー、ピッカーのウィンドウ
 │   ├── EmojiPickerView.swift      # ピッカーのUIとキー操作、絵文字の入力
 │   ├── EmojiData.swift            # 絵文字データの読み込み、よく使う絵文字
+│   ├── UsageSync.swift            # 使用回数の保存と、iCloud KVSによる同期
 │   ├── EmojiSearch.swift          # 検索（正規化、索引、並び順）
 │   ├── SearchField.swift          # 変換中の文字列も通知する検索欄
 │   ├── EmojiPaster.swift          # クリップボードと⌘Vによる絵文字の入力
