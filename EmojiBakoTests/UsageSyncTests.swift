@@ -557,6 +557,45 @@ final class UsageSyncTests: XCTestCase {
         XCTAssertEqual(a.sync.totals, ["😀": 1, "🍣": 3])
     }
 
+    /// サインアウトしたまま起動し、終了中に別のAppleアカウントでサインインした
+    func testAccountChangedAcrossSignedOutLaunchDoesNotWriteOldGeneration() {
+        let a = makeMac("MacA")
+        a.sync.enable()
+        a.sync.resetAllMacs()
+        a.sync.resetAllMacs()
+        syncAll()
+        a.iCloudIdentity = nil
+        a.launch()
+        server.values = ["mac.other": ["generation": 1, "name": "OtherMac", "updatedAt": Date(), "counts": ["🍣": 3]] as [String: Any]]
+        _ = a.cloud.pull()
+        a.iCloudIdentity = Data("account-2".utf8)
+
+        a.launch()
+        syncAll()
+
+        XCTAssertNil(server.values[UsageSync.generationKey])
+        XCTAssertEqual(a.sync.totals, ["🍣": 3])
+    }
+
+    /// 実行中にAppleアカウントが変わり、KVSの通知が届く前に終了した
+    func testAccountChangeNoticedBySignInStatusDoesNotWriteOldGeneration() {
+        let a = makeMac("MacA")
+        a.sync.enable()
+        a.sync.resetAllMacs()
+        a.sync.resetAllMacs()
+        syncAll()
+        server.values = ["mac.other": ["generation": 1, "name": "OtherMac", "updatedAt": Date(), "counts": ["🍣": 3]] as [String: Any]]
+        _ = a.cloud.pull()
+        a.iCloudIdentity = Data("account-2".utf8)
+
+        a.sync.iCloudSignInDidChange(signedIn: true, identity: a.iCloudIdentity)
+        a.launch()
+        syncAll()
+
+        XCTAssertNil(server.values[UsageSync.generationKey])
+        XCTAssertEqual(a.sync.totals, ["🍣": 3])
+    }
+
     func testMalformedGenerationIsReportedAndNotOverwritten() {
         let a = makeMac("MacA")
         a.sync.enable()

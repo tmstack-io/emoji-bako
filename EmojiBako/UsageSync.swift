@@ -150,17 +150,25 @@ final class UsageSync: ObservableObject {
     /// 起動時に、iCloudとの突き合わせを始める
     /// - Parameter iCloudIdentity: 今のAppleアカウントを表すデータ（サインインしていなければnil）
     func start(iCloudIdentity: Data?) {
-        let storedIdentity = local.data(forKey: Self.iCloudIdentityDefaultsKey)
-        local.set(iCloudIdentity, forKey: Self.iCloudIdentityDefaultsKey)
+        let accountChanged = recordICloudIdentity(iCloudIdentity)
         guard isEnabled else {
             recompute()
             return
         }
-        if storedIdentity != nil, iCloudIdentity != nil, storedIdentity != iCloudIdentity {
+        if accountChanged {
             // アプリを終了しているあいだにAppleアカウントが変わった
             joinCurrentGeneration()
         }
         applyCloudState()
+    }
+
+    /// 最後にサインインしていたAppleアカウントを記録し、記録と違うアカウントになったかどうかを返す。
+    /// サインアウト中（nil）は記録を上書きしない（サインアウトを挟んで別のアカウントになった場合も見分けるため）
+    private func recordICloudIdentity(_ identity: Data?) -> Bool {
+        guard let identity else { return false }
+        let stored = local.data(forKey: Self.iCloudIdentityDefaultsKey)
+        local.set(identity, forKey: Self.iCloudIdentityDefaultsKey)
+        return stored != nil && stored != identity
     }
 
     // MARK: - 操作
@@ -246,7 +254,11 @@ final class UsageSync: ObservableObject {
     /// iCloudのサインイン状態が分かったとき・変わったときに呼ぶ
     func iCloudSignInDidChange(signedIn: Bool, identity: Data?) {
         isICloudSignedIn = signedIn
-        local.set(identity, forKey: Self.iCloudIdentityDefaultsKey)
+        // KVSのAccountChangeの通知が届く前にアプリが終了しても、次の起動で古い世代を書かないよう、ここでも合わせる
+        if recordICloudIdentity(identity), isEnabled {
+            joinCurrentGeneration()
+            applyCloudState()
+        }
     }
 
     /// iCloud KVSを使えるかどうか（synchronize()の結果）が分かったときに呼ぶ
