@@ -2,6 +2,7 @@
 // Loads emoji data from bundled JSON file
 
 import Foundation
+import Combine
 import os
 
 struct EmojiItem: Codable, Hashable, Identifiable {
@@ -36,14 +37,23 @@ struct EmojiDataFile: Codable {
 class EmojiData: ObservableObject {
     static let shared = EmojiData()
 
-    @Published var usageCounts: [String: Int] = [:]
+    /// よく使う絵文字のカテゴリのID
+    static let frequentlyUsedCategoryID = "frequentlyUsed"
 
-    private let userDefaultsKey = "emojiUsageCounts"
+    /// 表示に使う使用回数（同期がオンなら同期中のMacの合計）
+    @Published private(set) var usageCounts: [String: Int] = [:]
+
+    let usageSync: UsageSync
+    private let cloudConnection: ICloudUsageSyncConnection
+    private let computerNameMonitor: ComputerNameMonitor
+    private var totalsSubscription: AnyCancellable?
+    /// 最後にログに記録した、絵文字データにない絵文字
+    private var loggedUnknownEmojis: Set<String> = []
 
     let categories: [EmojiCategory]
-    /// char(絵文字文字列)→EmojiItem のルックアップ。Favorites復元や検索で使用
+    /// char(絵文字文字列)→EmojiItem のルックアップ。よく使う絵文字や検索で使用
     let lookup: [String: EmojiItem]
-    /// 検索用の索引（Favoritesは除外）
+    /// 検索用の索引（よく使う絵文字のカテゴリは除外）
     let searchIndex: EmojiSearchIndex
 
     init() {
@@ -59,46 +69,45 @@ class EmojiData: ObservableObject {
             fatalError("emoji-data.jsonを読み込めません: \(error)")
         }
 
-        // Favoritesカテゴリを先頭に追加（emojisは空：実行時にusageCountsから生成）
-        let favorites = EmojiCategory(id: "favorites", name: "Favorites", icon: "star.fill", emojis: [])
-        self.categories = [favorites] + loadedCategories
+        // よく使う絵文字のカテゴリを先頭に追加（emojisは空：実行時にusageCountsから生成）
+        let frequentlyUsed = EmojiCategory(id: Self.frequentlyUsedCategoryID, name: "Frequently Used", icon: "star.fill", emojis: [])
+        self.categories = [frequentlyUsed] + loadedCategories
 
-        // ルックアップ辞書と検索用の索引（Favoritesは除外）
+        // ルックアップ辞書と検索用の索引（よく使う絵文字のカテゴリは除外）
         let flattened = loadedCategories.flatMap { $0.emojis }
         self.lookup = Dictionary(uniqueKeysWithValues: flattened.map { ($0.char, $0) })
         self.searchIndex = EmojiSearchIndex(items: flattened)
 
-        loadUsageCounts()
+        let usageSync = UsageSync(local: .standard, cloud: ICloudKeyValueStore(), computerName: ComputerNameMonitor.current)
+        self.usageSync = usageSync
+        self.cloudConnection = ICloudUsageSyncConnection(sync: usageSync)
+        self.computerNameMonitor = ComputerNameMonitor { usageSync.computerNameDidChange() }
+
+        totalsSubscription = usageSync.$totals.sink { [weak self] totals in
+            self?.usageCounts = totals
+            self?.logUnknownEmojis(in: totals)
+        }
+        cloudConnection.start()
+        computerNameMonitor.start()
     }
 
     private let logger = Logger(subsystem: "io.tmstack.EmojiBako", category: "EmojiData")
 
-    func loadUsageCounts() {
-        guard let stored = UserDefaults.standard.object(forKey: userDefaultsKey) else { return }
-        guard let counts = stored as? [String: Int] else {
-            logger.error("使用回数の保存データの形式が不正なため、使用回数なしで始めます: \(String(describing: stored), privacy: .public)")
-            return
-        }
-        usageCounts = counts
-        // 新しい版で使った絵文字を古い版で読んだ場合などに起きる。保存データは残し、表示からは外す
-        let unknown = counts.keys.filter { lookup[$0] == nil }
-        if !unknown.isEmpty {
-            logger.notice("絵文字データにない絵文字の使用回数があるため、よく使う絵文字には表示しません: \(unknown.sorted(), privacy: .public)")
-        }
-    }
-
-    func saveUsageCounts() {
-        UserDefaults.standard.set(usageCounts, forKey: userDefaultsKey)
+    /// 新しい版で使った絵文字を古い版で読んだ場合などに起きる。保存データは残し、表示からは外す
+    private func logUnknownEmojis(in counts: [String: Int]) {
+        let unknown = Set(counts.keys.filter { lookup[$0] == nil })
+        guard !unknown.isEmpty, unknown != loggedUnknownEmojis else { return }
+        loggedUnknownEmojis = unknown
+        logger.notice("絵文字データにない絵文字の使用回数があるため、よく使う絵文字には表示しません: \(unknown.sorted(), privacy: .public)")
     }
 
     func incrementUsage(for emoji: String) {
-        usageCounts[emoji, default: 0] += 1
-        saveUsageCounts()
+        usageSync.increment(emoji)
     }
 
-    /// お気に入り（使用頻度上位）を EmojiItem として返す。
-    /// 絵文字データにない絵文字（新しい版で使ったものなど）は、読み込み時にログに残したうえで除外する。
-    func getFavorites() -> [EmojiItem] {
+    /// よく使う絵文字（使用回数の多い順に最大50件）を返す。
+    /// 絵文字データにない絵文字（新しい版で使ったものなど）は、ログに残したうえで除外する。
+    func frequentlyUsedEmojis() -> [EmojiItem] {
         return usageCounts
             .filter { lookup[$0.key] != nil }
             .sorted { lhs, rhs in

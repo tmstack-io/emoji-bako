@@ -58,7 +58,7 @@
 
 | ID | 表示名（英語） | 表示名（日本語） | カテゴリアイコン |
 |----|----------------|------------------|------------------|
-| favorites | Frequently Used | よく使う絵文字 | star.fill |
+| frequentlyUsed | Frequently Used | よく使う絵文字 | star.fill |
 | smileys | Smileys | 顔と感情 | face.smiling |
 | people | People | 人と体 | person |
 | animals | Animals & Nature | 動物と自然 | hare |
@@ -318,6 +318,7 @@ emoji-picker/
 │   ├── EmojiPickerView.swift      # ピッカーのUIとキー操作、絵文字の入力
 │   ├── EmojiData.swift            # 絵文字データの読み込み、よく使う絵文字
 │   ├── UsageSync.swift            # 使用回数の保存と、iCloud KVSによる同期
+│   ├── ICloudUsageStore.swift     # iCloud KVS・変更通知・サインイン状態・コンピュータ名とのつなぎ
 │   ├── EmojiSearch.swift          # 検索（正規化、索引、並び順）
 │   ├── SearchField.swift          # 変換中の文字列も通知する検索欄
 │   ├── EmojiPaster.swift          # クリップボードと⌘Vによる絵文字の入力

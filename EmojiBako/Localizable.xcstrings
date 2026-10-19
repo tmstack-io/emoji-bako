@@ -87,14 +87,14 @@
         }
       }
     },
-    "Favorites": {
+    "Frequently Used": {
       "comment": "カテゴリ名（絵文字データのカテゴリの表示名）",
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Favorites"
+            "value": "Frequently Used"
           }
         },
         "ja": {

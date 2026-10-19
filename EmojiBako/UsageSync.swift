@@ -66,6 +66,10 @@ final class UsageSync: ObservableObject {
     /// ほかのMacで、このMacが同期から外された
     @Published private(set) var wasRemovedByOtherMac: Bool
     @Published private(set) var lastError: SyncError?
+    /// iCloudにサインインしている（していなければ、使用回数はこのMacの中にだけ記録される）
+    @Published private(set) var isICloudSignedIn = true
+    /// iCloud KVSを使える（entitlementがないなどで使えなければfalse）
+    @Published private(set) var isCloudStoreAvailable = true
 
     /// このMacで数えた使用回数（現在の世代の分）
     private(set) var thisMacCounts: [String: Int]
@@ -190,6 +194,16 @@ final class UsageSync: ObservableObject {
             // 初めて読み込んだ世代や、別のApple IDの世代は、リセットではないので使用回数を消さずに採る
             if isEnabled { applyCloudState(adoptCloudGeneration: true) }
         }
+    }
+
+    /// iCloudのサインイン状態が分かったとき・変わったときに呼ぶ
+    func iCloudSignInDidChange(signedIn: Bool) {
+        isICloudSignedIn = signedIn
+    }
+
+    /// iCloud KVSを使えないと分かったときに呼ぶ
+    func cloudStoreDidBecomeUnavailable() {
+        isCloudStoreAvailable = false
     }
 
     /// コンピュータ名が変わったときに呼ぶ

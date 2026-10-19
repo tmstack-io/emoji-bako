@@ -79,7 +79,7 @@ struct EmojiPickerView: View {
         }
         .onChange(of: emojiData.usageCounts) {
             guard !isSearching, selectedCategoryIndex < emojiData.categories.count else { return }
-            if emojiData.categories[selectedCategoryIndex].id == "favorites" {
+            if emojiData.categories[selectedCategoryIndex].id == EmojiData.frequentlyUsedCategoryID {
                 updateCurrentEmojis()
             }
         }
@@ -171,8 +171,8 @@ struct EmojiPickerView: View {
                 return
             }
             let category = emojiData.categories[selectedCategoryIndex]
-            if category.id == "favorites" {
-                currentEmojis = emojiData.getFavorites()
+            if category.id == EmojiData.frequentlyUsedCategoryID {
+                currentEmojis = emojiData.frequentlyUsedEmojis()
             } else {
                 currentEmojis = category.emojis
             }
