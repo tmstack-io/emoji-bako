@@ -49,7 +49,7 @@ EmojiBakoは、ホットキーで呼び出して日本語で検索できる、ma
 
 ```sh
 xcodegen generate                                   # project.ymlからXcodeプロジェクトを生成する
-xcodebuild -scheme EmojiBako test                   # テスト
+xcodebuild -scheme EmojiBako -allowProvisioningUpdates test  # テスト（初回はXcodeが開発版のApp IDとプロファイルを作る）
 swift scripts/generate-emoji-data.swift             # 絵文字データを生成する
 swift scripts/check-readings.swift                  # 読みをclaude -pでチェックする
 zsh scripts/release.sh                              # 署名・公証済みのDMGを作る

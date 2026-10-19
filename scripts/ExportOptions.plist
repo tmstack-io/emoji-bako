@@ -10,5 +10,10 @@
 	<string>Developer ID Application</string>
 	<key>teamID</key>
 	<string>PCUA32D2L3</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>io.tmstack.EmojiBako</key>
+		<string>EmojiBako Developer ID</string>
+	</dict>
 </dict>
 </plist>

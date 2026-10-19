@@ -10,6 +10,10 @@
 #        xcrun notarytool store-credentials notary-PCUA32D2L3 --apple-id <Apple ID> --team-id PCUA32D2L3
 #      App用パスワードはMacごとに「notarytool-<Mac名>」の名前で発行し、プロファイルはチームごとに1つ（全アプリ共通）とする。
 #      プロファイル名を変える場合は、環境変数NOTARY_PROFILEで指定する。
+#   3. iCloud（使用回数の同期）を許可するDeveloper ID用のプロビジョニングプロファイル「EmojiBako Developer ID」:
+#        developer.apple.comでApp ID io.tmstack.EmojiBakoのiCloudを有効にし、Profiles > ＋ > Developer IDで作成する。
+#        ダウンロードしたファイルを ~/Library/Developer/Xcode/UserData/Provisioning Profiles/<UUID>.provisionprofile に置く。
+#        名前はscripts/ExportOptions.plistのprovisioningProfilesと一致させる。
 #
 # 公証はアプリとDMGの両方に行い、両方にチケットをステープルする（オフラインでも初回起動の検証が通るように）。
 #
@@ -22,6 +26,9 @@ caffeinate -d -i -w $$ &!
 
 TEAM_ID="PCUA32D2L3"
 NOTARY_PROFILE="${NOTARY_PROFILE:-notary-${TEAM_ID}}"
+BUNDLE_ID="io.tmstack.EmojiBako"
+PROVISIONING_PROFILE_NAME="EmojiBako Developer ID"
+PROFILES_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
 ROOT="${0:A:h:h}"
 OUT="$ROOT/build/release"
 
@@ -37,6 +44,22 @@ IDENTITY=$(security find-identity -v -p codesigning | grep "Developer ID Applica
 xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1 \
   || fail "公証用のキーチェーンプロファイル「${NOTARY_PROFILE}」を使えません。スクリプト冒頭の手順2を行ってください。"
 [[ -z "$(git -C "$ROOT" status --porcelain)" ]] || fail "コミットされていない変更があります。リリースはコミット済みの状態から作ってください。"
+
+# 名前が一致するプロビジョニングプロファイルを探し、有効期限とiCloud KVSの許可を確かめる
+PROFILE_PLIST="$(mktemp -t emojibako-profile)"
+FOUND_PROFILE=""
+for f in "$PROFILES_DIR"/*.provisionprofile(N); do
+  security cms -D -i "$f" > "$PROFILE_PLIST" 2>/dev/null || continue
+  [[ "$(plutil -extract Name raw -o - "$PROFILE_PLIST")" == "$PROVISIONING_PROFILE_NAME" ]] || continue
+  [[ -z "$FOUND_PROFILE" ]] || fail "「${PROVISIONING_PROFILE_NAME}」という名前のプロファイルが複数あります。古いものを${PROFILES_DIR}から取り除いてください: ${FOUND_PROFILE} / ${f}"
+  FOUND_PROFILE="$f"
+  EXPIRATION="$(plutil -extract ExpirationDate raw -o - "$PROFILE_PLIST")"
+  [[ "$EXPIRATION" > "$(date -u +%Y-%m-%dT%H:%M:%SZ)" ]] || fail "プロファイル「${PROVISIONING_PROFILE_NAME}」の有効期限（${EXPIRATION}）が切れています。スクリプト冒頭の手順3で作り直してください。"
+  [[ "$(plutil -extract Entitlements.com\\.apple\\.developer\\.ubiquity-kvstore-identifier raw -o - "$PROFILE_PLIST" 2>/dev/null)" == "${TEAM_ID}."* ]] \
+    || fail "プロファイル「${PROVISIONING_PROFILE_NAME}」にiCloud key-value storageの許可がありません。App IDでiCloudを有効にしてから作り直してください。"
+done
+rm -f "$PROFILE_PLIST"
+[[ -n "$FOUND_PROFILE" ]] || fail "プロファイル「${PROVISIONING_PROFILE_NAME}」が${PROFILES_DIR}にありません。スクリプト冒頭の手順3を行ってください。"
 
 print "署名に使う証明書: $IDENTITY"
 
@@ -54,6 +77,7 @@ xcodebuild archive \
   -project EmojiBako.xcodeproj -scheme EmojiBako -configuration Release \
   -archivePath "$OUT/EmojiBako.xcarchive" \
   CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$IDENTITY" DEVELOPMENT_TEAM="$TEAM_ID" \
+  PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_NAME" \
   | grep -E "error:|warning:|ARCHIVE (SUCCEEDED|FAILED)"
 xcodebuild -exportArchive \
   -archivePath "$OUT/EmojiBako.xcarchive" -exportPath "$OUT/export" \
@@ -65,6 +89,9 @@ APP="$OUT/export/EmojiBako.app"
 VERSION=$(/usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" "$APP/Contents/Info.plist")
 [[ "$(lipo -archs "$APP/Contents/MacOS/EmojiBako")" == "arm64" ]] || fail "arm64のみのバイナリになっていません"
 codesign --verify --strict --deep "$APP"
+[[ -f "$APP/Contents/embedded.provisionprofile" ]] || fail "書き出したアプリにプロビジョニングプロファイルが埋め込まれていません"
+KVS_ID="$(codesign -d --entitlements - --xml "$APP" 2>/dev/null | plutil -extract com\\.apple\\.developer\\.ubiquity-kvstore-identifier raw -o - -)"
+[[ "$KVS_ID" == "${TEAM_ID}.${BUNDLE_ID}" ]] || fail "署名のiCloud KVSの識別子が想定と異なります: ${KVS_ID}"
 
 # --- アプリの公証 -------------------------------------------------------------
 

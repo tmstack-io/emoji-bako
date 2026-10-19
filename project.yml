@@ -32,11 +32,17 @@ targets:
         DEVELOPMENT_TEAM: PCUA32D2L3
         CODE_SIGN_STYLE: Automatic
         ENABLE_HARDENED_RUNTIME: YES
+        # iCloud KVS（使用回数の同期）。識別子は$(TeamIdentifierPrefix)$(CFBundleIdentifier)なので、DebugとReleaseで別の保存先になる
+        CODE_SIGN_ENTITLEMENTS: EmojiBako/EmojiBako.entitlements
         ARCHS: arm64
         SWIFT_VERSION: "5.0"
         MACOSX_DEPLOYMENT_TARGET: "14.4"
         SWIFT_EMIT_LOC_STRINGS: YES
         LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+      configs:
+        # 開発版は配布版と別のアプリとして扱う（使用回数・設定・iCloud KVS・メニューバーの表示設定を分ける）
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: io.tmstack.EmojiBako.debug
     scheme:
       gatherCoverageData: false
       testTargets:

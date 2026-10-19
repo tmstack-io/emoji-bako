@@ -65,6 +65,7 @@
 		A8129EF15F41A0D80C87DA88 /* UpdateCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateCheckerTests.swift; sourceTree = "<group>"; };
 		AAF8AD7DF67488225D32AA9F /* HotKeyRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyRecorder.swift; sourceTree = "<group>"; };
 		AB10861523A6F49931D0C396 /* EmojiSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSearch.swift; sourceTree = "<group>"; };
+		AB866FF919C83E7F7E82EEB6 /* EmojiBako.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EmojiBako.entitlements; sourceTree = "<group>"; };
 		AD62D596F994A1826B7172B1 /* EmojiPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
 		C2F0647B9292700A3CEC3615 /* EmojiBakoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiBakoApp.swift; sourceTree = "<group>"; };
 		C5E29E711E654D9F941E3BFE /* SearchFieldTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchFieldTests.swift; sourceTree = "<group>"; };
@@ -104,6 +105,7 @@
 				68DB8CDB301819C8CF0C3149 /* AccessibilityPermission.swift */,
 				048FC01CA25F8B40465A0C07 /* Assets.xcassets */,
 				97B1BECC550EC0EE9CA42E1E /* emoji-data.json */,
+				AB866FF919C83E7F7E82EEB6 /* EmojiBako.entitlements */,
 				C2F0647B9292700A3CEC3615 /* EmojiBakoApp.swift */,
 				788AB52F4B460C230DBA12C8 /* EmojiData.swift */,
 				60102EEF9AE1AB158AFBC84C /* EmojiPaster.swift */,
@@ -297,6 +299,7 @@
 			buildSettings = {
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = EmojiBako/EmojiBako.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = PCUA32D2L3;
@@ -308,7 +311,7 @@
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
-				PRODUCT_BUNDLE_IDENTIFIER = io.tmstack.EmojiBako;
+				PRODUCT_BUNDLE_IDENTIFIER = io.tmstack.EmojiBako.debug;
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -398,6 +401,7 @@
 			buildSettings = {
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = EmojiBako/EmojiBako.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = PCUA32D2L3;
