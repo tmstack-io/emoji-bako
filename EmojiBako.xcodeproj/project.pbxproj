@@ -10,6 +10,7 @@
 		0C83F7EDF6CF6722498C7243 /* EmojiSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB10861523A6F49931D0C396 /* EmojiSearch.swift */; };
 		127290284083502B484CAF4A /* EmojiPaster.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60102EEF9AE1AB158AFBC84C /* EmojiPaster.swift */; };
 		1535A6A4ECE02115A267532C /* HotKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1914AF68886C66A348FEF60E /* HotKey.swift */; };
+		15C27013DDBA10FD6ED7CE86 /* UsageSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2859C9E59055D545FB01B44 /* UsageSettingsView.swift */; };
 		1D16D5D1D14B8B871C54B8F8 /* EmojiPasterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2368793942C46457B7EDC71B /* EmojiPasterTests.swift */; };
 		36E8027A961D326B76317394 /* SearchField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61EF1705CD5202798282BDD9 /* SearchField.swift */; };
 		3CB54E56B2E59453FF1C5416 /* SearchFieldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5E29E711E654D9F941E3BFE /* SearchFieldTests.swift */; };
@@ -20,15 +21,16 @@
 		54390D7888B7D6921A208B44 /* LICENSE-UNICODE.txt in Resources */ = {isa = PBXBuildFile; fileRef = 556649683CCC51A0B700BBF2 /* LICENSE-UNICODE.txt */; };
 		6734909E5F262A3989C7A4EF /* HotKeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDEF9B0DED93577CA4686B0 /* HotKeyTests.swift */; };
 		7E3EEF8A209F2C7623DAFF32 /* EmojiData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 788AB52F4B460C230DBA12C8 /* EmojiData.swift */; };
+		880CB81CFBFC61976914DAB7 /* UsageBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A8255AB424B615B79EB7D8F /* UsageBackup.swift */; };
 		942D35F82521CE3874866736 /* UsageSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6AC33B5EDF62063B783A0F /* UsageSync.swift */; };
 		A0F6ED1C197399898D4A880A /* ICloudUsageStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E14A0C9B98BE6F670C7F8C /* ICloudUsageStoreTests.swift */; };
 		A1BA9B8C89FA5A646975318D /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD62D596F994A1826B7172B1 /* EmojiPickerView.swift */; };
 		A5D45D270C26EF27BE0F9C9F /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C5469005528D78ACEA1119 /* UpdateChecker.swift */; };
 		AAC103F561770622B8BACEED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 048FC01CA25F8B40465A0C07 /* Assets.xcassets */; };
 		ACEB40C9CA674FB20C63934D /* UsageSyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DF4D384065A889F10B21C8 /* UsageSyncTests.swift */; };
+		AD980E431B5CAB3FCE377DDC /* UsageBackupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B11C2FFC832140AC6A2D5F5 /* UsageBackupTests.swift */; };
 		BB159520AE58E978A256AF79 /* EmojiSearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D93112423ABC244AAA0229 /* EmojiSearchTests.swift */; };
 		BF77D71FEF174F3F0FEFEC63 /* ICloudUsageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F397A7B30EE9076023B61637 /* ICloudUsageStore.swift */; };
-		BFF28D63E6B13E1F0D2C1F96 /* UsageSyncSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF9CB8451CEBDE7715B1243 /* UsageSyncSettingsView.swift */; };
 		C014212CED240C8562ED11BB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */; };
 		D4BB0C086D9DEC38835823B1 /* PasteboardSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9984CA19ED51419159ABA998 /* PasteboardSnapshotTests.swift */; };
 		D81B7B62F6794110014958A4 /* KeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBD625D3232917532D81B4D9 /* KeyboardLayout.swift */; };
@@ -55,20 +57,22 @@
 		2368793942C46457B7EDC71B /* EmojiPasterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPasterTests.swift; sourceTree = "<group>"; };
 		2BEA41BB1778925E471FBAA4 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		4B11C2FFC832140AC6A2D5F5 /* UsageBackupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageBackupTests.swift; sourceTree = "<group>"; };
 		556649683CCC51A0B700BBF2 /* LICENSE-UNICODE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "LICENSE-UNICODE.txt"; sourceTree = "<group>"; };
 		5DDEF9B0DED93577CA4686B0 /* HotKeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyTests.swift; sourceTree = "<group>"; };
 		60102EEF9AE1AB158AFBC84C /* EmojiPaster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPaster.swift; sourceTree = "<group>"; };
 		61EF1705CD5202798282BDD9 /* SearchField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchField.swift; sourceTree = "<group>"; };
 		62C5469005528D78ACEA1119 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		68DB8CDB301819C8CF0C3149 /* AccessibilityPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermission.swift; sourceTree = "<group>"; };
+		6A8255AB424B615B79EB7D8F /* UsageBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageBackup.swift; sourceTree = "<group>"; };
 		788AB52F4B460C230DBA12C8 /* EmojiData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiData.swift; sourceTree = "<group>"; };
 		78DC0583C24893DF16C03ECF /* EmojiBako.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmojiBako.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		7EF9CB8451CEBDE7715B1243 /* UsageSyncSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSyncSettingsView.swift; sourceTree = "<group>"; };
 		7FCEFA50FA8A52470A66DC4D /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
 		84D93112423ABC244AAA0229 /* EmojiSearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSearchTests.swift; sourceTree = "<group>"; };
 		8E6AC33B5EDF62063B783A0F /* UsageSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSync.swift; sourceTree = "<group>"; };
 		97B1BECC550EC0EE9CA42E1E /* emoji-data.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "emoji-data.json"; sourceTree = "<group>"; };
 		9984CA19ED51419159ABA998 /* PasteboardSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardSnapshotTests.swift; sourceTree = "<group>"; };
+		A2859C9E59055D545FB01B44 /* UsageSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSettingsView.swift; sourceTree = "<group>"; };
 		A8129EF15F41A0D80C87DA88 /* UpdateCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateCheckerTests.swift; sourceTree = "<group>"; };
 		AAF8AD7DF67488225D32AA9F /* HotKeyRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyRecorder.swift; sourceTree = "<group>"; };
 		AB10861523A6F49931D0C396 /* EmojiSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSearch.swift; sourceTree = "<group>"; };
@@ -106,6 +110,7 @@
 				9984CA19ED51419159ABA998 /* PasteboardSnapshotTests.swift */,
 				C5E29E711E654D9F941E3BFE /* SearchFieldTests.swift */,
 				A8129EF15F41A0D80C87DA88 /* UpdateCheckerTests.swift */,
+				4B11C2FFC832140AC6A2D5F5 /* UsageBackupTests.swift */,
 				C5DF4D384065A889F10B21C8 /* UsageSyncTests.swift */,
 			);
 			path = EmojiBakoTests;
@@ -133,8 +138,9 @@
 				61EF1705CD5202798282BDD9 /* SearchField.swift */,
 				40F41ADA7FE6BFB3EBCA67DC /* SettingsView.swift */,
 				62C5469005528D78ACEA1119 /* UpdateChecker.swift */,
+				6A8255AB424B615B79EB7D8F /* UsageBackup.swift */,
+				A2859C9E59055D545FB01B44 /* UsageSettingsView.swift */,
 				8E6AC33B5EDF62063B783A0F /* UsageSync.swift */,
-				7EF9CB8451CEBDE7715B1243 /* UsageSyncSettingsView.swift */,
 			);
 			path = EmojiBako;
 			sourceTree = "<group>";
@@ -261,8 +267,9 @@
 				36E8027A961D326B76317394 /* SearchField.swift in Sources */,
 				C014212CED240C8562ED11BB /* SettingsView.swift in Sources */,
 				A5D45D270C26EF27BE0F9C9F /* UpdateChecker.swift in Sources */,
+				880CB81CFBFC61976914DAB7 /* UsageBackup.swift in Sources */,
+				15C27013DDBA10FD6ED7CE86 /* UsageSettingsView.swift in Sources */,
 				942D35F82521CE3874866736 /* UsageSync.swift in Sources */,
-				BFF28D63E6B13E1F0D2C1F96 /* UsageSyncSettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,6 +284,7 @@
 				D4BB0C086D9DEC38835823B1 /* PasteboardSnapshotTests.swift in Sources */,
 				3CB54E56B2E59453FF1C5416 /* SearchFieldTests.swift in Sources */,
 				50C5B3A66D4543E3D66B1600 /* UpdateCheckerTests.swift in Sources */,
+				AD980E431B5CAB3FCE377DDC /* UsageBackupTests.swift in Sources */,
 				ACEB40C9CA674FB20C63934D /* UsageSyncTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

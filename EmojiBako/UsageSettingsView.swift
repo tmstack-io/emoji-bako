@@ -1,14 +1,25 @@
-// UsageSyncSettingsView.swift
-// 設定画面の「同期」: 使用回数の同期のオンとオフ、同期中のMacの一覧、リセット
+// UsageSettingsView.swift
+// 設定画面の「使用回数」: 使用回数の同期のオンとオフ、同期中のMacの一覧、リセット、バックアップ
 
 import SwiftUI
+import UniformTypeIdentifiers
 
-struct UsageSyncSettingsView: View {
+struct UsageSettingsView: View {
     @ObservedObject var sync: UsageSync
 
     @State private var confirmingResetAllMacs = false
     @State private var confirmingResetThisMac = false
     @State private var macToRemove: UsageSync.Mac?
+    /// 読み込む前の確認画面に出しているバックアップ
+    @State private var backupToRestore: UsageBackup?
+    /// 書き出し・読み込みに失敗したときに出す説明
+    @State private var backupFailure: BackupFailure?
+
+    /// 書き出し・読み込みの失敗
+    private struct BackupFailure {
+        let title: String
+        let message: String
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -40,6 +51,18 @@ struct UsageSyncSettingsView: View {
                 Button("このMacの使用回数をリセット…") { confirmingResetThisMac = true }
             }
             .controlSize(.small)
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Button("使用回数を書き出す…") { exportBackup() }
+                    Button("使用回数を読み込む…") { chooseBackupToRestore() }
+                }
+                .controlSize(.small)
+                Text("このMacで数えた使用回数をファイルに書き出し、あとで戻せます。同期中でも、ほかのMacの使用回数は含みません。")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .padding(.vertical, 4)
         // 確認画面を開いているあいだに、ほかのMacでこのMacが同期から外された場合などは、同期中の操作を取りやめる
@@ -75,6 +98,70 @@ struct UsageSyncSettingsView: View {
             Button("キャンセル", role: .cancel) {}
         } message: {
             Text("そのMacの使用回数を合計から除きます。そのMacでは同期がオフになり、そのMacで数えた使用回数はそのMacに残ります。もう一度同期するには、そのMacで同期をオンにしてください。")
+        }
+        .alert(
+            "このMacの使用回数を置き換えますか？",
+            isPresented: Binding(get: { backupToRestore != nil }, set: { if !$0 { backupToRestore = nil } }),
+            presenting: backupToRestore
+        ) { backup in
+            Button("置き換える", role: .destructive) { sync.restore(from: backup) }
+            Button("キャンセル", role: .cancel) {}
+        } message: { backup in
+            restoreConfirmationMessage(for: backup)
+        }
+        .alert(
+            backupFailure?.title ?? "",
+            isPresented: Binding(get: { backupFailure != nil }, set: { if !$0 { backupFailure = nil } })
+        ) {
+            Button("OK") {}
+        } message: {
+            Text(backupFailure?.message ?? "")
+        }
+    }
+
+    /// 読み込む前の確認画面の説明
+    private func restoreConfirmationMessage(for backup: UsageBackup) -> Text {
+        let summary = Text("「\(backup.computerName)」で\(backup.exportedAt.formatted(date: .long, time: .shortened))に書き出した使用回数（絵文字\(backup.counts.count)種類）で、このMacの使用回数を置き換えます。この操作は取り消せません。")
+        // 同期中のほかのMacのバックアップを読み込むと、そのMacの欄と二重に数えることになる
+        guard sync.macs.contains(where: { !$0.isThisMac && $0.name == backup.computerName }) else { return summary }
+        return summary + Text(verbatim: "\n\n") + Text("「\(backup.computerName)」は同期中のため、そのMacの使用回数が二重に数えられます。二重に数えたくない場合は、先にそのMacを同期から外してください。")
+    }
+
+    /// このMacの使用回数を、保存画面で選んだファイルに書き出す
+    private func exportBackup() {
+        let backup = sync.makeBackup()
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.json]
+        panel.nameFieldStringValue = backup.suggestedFileName
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try backup.encoded().write(to: url, options: .atomic)
+        } catch {
+            backupFailure = BackupFailure(
+                title: String(localized: "使用回数を書き出せませんでした"),
+                message: error.localizedDescription
+            )
+        }
+    }
+
+    /// 開く画面で選んだバックアップを読み、確認画面を出す
+    private func chooseBackupToRestore() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        let title = String(localized: "使用回数を読み込めませんでした")
+        let data: Data
+        do {
+            data = try Data(contentsOf: url)
+        } catch {
+            backupFailure = BackupFailure(title: title, message: error.localizedDescription)
+            return
+        }
+        do {
+            backupToRestore = try UsageBackup.decode(data)
+        } catch {
+            backupFailure = BackupFailure(title: title, message: error.message)
         }
     }
 

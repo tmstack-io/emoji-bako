@@ -77,6 +77,16 @@
         }
       }
     },
+    "EmojiBakoの使用回数のバックアップではありません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This file is not an EmojiBako usage count backup."
+          }
+        }
+      }
+    },
     "EmojiBakoはMITライセンスで公開しています。絵文字の名前とキーワードには、Unicode, Inc.のデータ（Unicode License v3）を使用しています。": {
       "localizations": {
         "en": {
@@ -157,6 +167,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "MIT License"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
           }
         }
       }
@@ -321,6 +341,26 @@
         }
       }
     },
+    "「%@」で%@に書き出した使用回数（絵文字%lld種類）で、このMacの使用回数を置き換えます。この操作は取り消せません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The usage counts on this Mac will be replaced with the counts exported from “%1$@” on %2$@ (%3$lld emoji). This cannot be undone."
+          }
+        }
+      }
+    },
+    "「%@」は同期中のため、そのMacの使用回数が二重に数えられます。二重に数えたくない場合は、先にそのMacを同期から外してください。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“%@” is still syncing, so its usage counts will be counted twice. To avoid this, remove that Mac from sync first."
+          }
+        }
+      }
+    },
     "「%@」を同期から外しますか？": {
       "localizations": {
         "en": {
@@ -361,6 +401,16 @@
         }
       }
     },
+    "このMacで数えた使用回数をファイルに書き出し、あとで戻せます。同期中でも、ほかのMacの使用回数は含みません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export the usage counts from this Mac to a file so you can restore them later. Usage counts from other Macs aren’t included, even while syncing."
+          }
+        }
+      }
+    },
     "このMacの使用回数をリセット…": {
       "localizations": {
         "en": {
@@ -391,12 +441,32 @@
         }
       }
     },
+    "このMacの使用回数を置き換えますか？": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace Usage Counts on This Mac?"
+          }
+        }
+      }
+    },
     "このキーはショートカットに使えません": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "This key can't be used for a shortcut"
+          }
+        }
+      }
+    },
+    "このバージョンのEmojiBakoでは読み込めない形式です。新しいバージョンのEmojiBakoで書き出したバックアップかもしれません。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version of EmojiBako can’t read this format. The backup may have been exported from a newer version of EmojiBako."
           }
         }
       }
@@ -571,6 +641,26 @@
         }
       }
     },
+    "バックアップに不正な使用回数があります（%@）。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The backup contains an invalid usage count (%@)."
+          }
+        }
+      }
+    },
+    "バックアップの内容が壊れています。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The backup file is damaged or incomplete."
+          }
+        }
+      }
+    },
     "バージョン": {
       "localizations": {
         "en": {
@@ -641,12 +731,52 @@
         }
       }
     },
-    "同期": {
+    "使用回数": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sync"
+            "value": "Usage Counts"
+          }
+        }
+      }
+    },
+    "使用回数を書き出す…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export Usage Counts…"
+          }
+        }
+      }
+    },
+    "使用回数を書き出せませんでした": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t Export Usage Counts"
+          }
+        }
+      }
+    },
+    "使用回数を読み込む…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import Usage Counts…"
+          }
+        }
+      }
+    },
+    "使用回数を読み込めませんでした": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t Import Usage Counts"
           }
         }
       }
@@ -757,6 +887,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Search emoji"
+          }
+        }
+      }
+    },
+    "置き換える": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replace"
           }
         }
       }

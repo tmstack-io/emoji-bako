@@ -422,6 +422,129 @@ final class UsageSyncTests: XCTestCase {
         XCTAssertNil(server.values[UsageSync.macKeyPrefix + bID], "オフラインのあいだに書いた欄も消す")
     }
 
+    // MARK: - 使用回数のバックアップ
+
+    func testBackupContainsOnlyThisMacCountsWhileSyncIsOn() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        a.sync.enable(); b.sync.enable()
+        a.use("😀", times: 2)
+        b.use("🎉")
+        syncAll()
+
+        let backup = a.sync.makeBackup()
+
+        XCTAssertEqual(backup.counts, ["😀": 2])
+        XCTAssertEqual(backup.computerName, "MacA")
+    }
+
+    func testRestoreReplacesCountsWhileSyncIsOff() {
+        let a = makeMac("MacA")
+        a.use("😀")
+        let backup = a.sync.makeBackup()
+        a.use("🎉", times: 3)
+
+        a.sync.restore(from: backup)
+        a.launch()
+
+        XCTAssertEqual(a.sync.totals, ["😀": 1])
+        XCTAssertEqual(a.cloud.writeCount, 0, "同期がオフのときはiCloudに書かない")
+    }
+
+    func testRestoreWhileSyncIsOnReplacesOnlyThisMacShare() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        a.sync.enable(); b.sync.enable()
+        a.use("😀", times: 2)
+        b.use("🎉")
+        syncAll()
+        let backup = a.sync.makeBackup()
+        a.use("😀", times: 5)
+        syncAll()
+
+        a.sync.restore(from: backup)
+        syncAll()
+        a.launch()
+        syncAll()
+
+        XCTAssertEqual(a.sync.totals, ["😀": 2, "🎉": 1])
+        XCTAssertEqual(b.sync.totals, ["😀": 2, "🎉": 1])
+    }
+
+    func testRestoreBeforeLearningOfOtherMacsResetKeepsRestoredCounts() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        a.sync.enable(); b.sync.enable()
+        a.use("😀", times: 2)
+        b.use("🎉")
+        syncAll()
+        let backup = a.sync.makeBackup()
+        // Bのリセットが届く前に、Aでバックアップを読み込む
+        b.sync.resetAllMacs()
+        a.sync.restore(from: backup)
+        syncAll()
+
+        XCTAssertEqual(a.sync.totals, ["😀": 2])
+        XCTAssertEqual(b.sync.totals, ["😀": 2])
+    }
+
+    func testResetMadeAfterRestoreStillClearsRestoredCounts() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        a.sync.enable(); b.sync.enable()
+        a.use("😀", times: 2)
+        syncAll()
+        let backup = a.sync.makeBackup()
+        a.sync.restore(from: backup)
+        syncAll()
+
+        b.sync.resetAllMacs()
+        syncAll()
+
+        XCTAssertEqual(a.sync.totals, [:])
+        XCTAssertEqual(b.sync.totals, [:])
+    }
+
+    func testRestoreAfterResetAllMacsBringsBackOnlyThisMacShare() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        a.sync.enable(); b.sync.enable()
+        a.use("😀", times: 2)
+        b.use("🎉")
+        syncAll()
+        let backup = a.sync.makeBackup()
+        a.sync.resetAllMacs()
+        syncAll()
+
+        a.sync.restore(from: backup)
+        syncAll()
+        b.launch()
+        syncAll()
+
+        XCTAssertEqual(a.sync.totals, ["😀": 2])
+        XCTAssertEqual(b.sync.totals, ["😀": 2])
+    }
+
+    func testRestoreBackupFromAnotherMac() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        a.use("😀", times: 4)
+        b.use("🎉")
+
+        b.sync.restore(from: a.sync.makeBackup())
+
+        XCTAssertEqual(b.sync.totals, ["😀": 4])
+    }
+
+    func testRestoringEmptyBackupClearsThisMacOnly() {
+        let a = makeMac("MacA"), b = makeMac("MacB")
+        let empty = a.sync.makeBackup()
+        a.sync.enable(); b.sync.enable()
+        a.use("😀")
+        b.use("🎉")
+        syncAll()
+
+        a.sync.restore(from: empty)
+        syncAll()
+
+        XCTAssertEqual(a.sync.totals, ["🎉": 1])
+        XCTAssertEqual(b.sync.totals, ["🎉": 1])
+    }
+
     // MARK: - v1.0.0からの移行（Q13）
 
     func testMigratesV1_0_0CountsOnce() {

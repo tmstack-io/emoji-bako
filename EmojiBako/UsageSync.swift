@@ -221,6 +221,23 @@ final class UsageSync: ObservableObject {
         recompute()
     }
 
+    /// このMacで数えた使用回数のバックアップを作る。同期中でも、ほかのMacの使用回数は含めない
+    func makeBackup() -> UsageBackup {
+        UsageBackup(exportedAt: now(), computerName: computerName, counts: thisMacCounts)
+    }
+
+    /// バックアップの内容で、このMacの使用回数を置き換える。世代は変えず、ほかのMacの使用回数にも触れない
+    func restore(from backup: UsageBackup) {
+        thisMacCounts = backup.counts
+        saveThisMacCounts()
+        if isEnabled {
+            // 読み込む前にほかのMacで行われ、まだ届いていないすべてのMacのリセットで、読み込んだ使用回数を消さない
+            local.set(now(), forKey: Self.joinedAtDefaultsKey)
+            writeThisMacSlotIfNeeded()
+        }
+        recompute()
+    }
+
     /// ほかのMacを同期から外す
     func removeMac(id: String) {
         precondition(isEnabled, "同期から外す操作は同期がオンのときだけ行える")
@@ -432,7 +449,8 @@ final class UsageSync: ObservableObject {
         local.set(generation.resetAt, forKey: Self.generationResetAtDefaultsKey)
     }
 
-    /// このMacが今のIDで同期に加わった日時
+    /// このMacが今のIDで同期に加わった日時。バックアップを読み込んだときも、その日時に進める。
+    /// これより前に行われたすべてのMacのリセットでは、このMacの使用回数を消さない
     private var joinedAt: Date {
         guard let date = local.object(forKey: Self.joinedAtDefaultsKey) as? Date else {
             preconditionFailure("同期がオンなのに、同期に加わった日時がありません")

@@ -57,9 +57,9 @@ struct SettingsView: View {
                 .padding(.vertical, 4)
             }
             
-            // 同期
-            GroupBox(label: Text("同期").fontWeight(.semibold)) {
-                UsageSyncSettingsView(sync: EmojiData.shared.usageSync)
+            // 使用回数
+            GroupBox(label: Text("使用回数").fontWeight(.semibold)) {
+                UsageSettingsView(sync: EmojiData.shared.usageSync)
             }
 
             // 情報
